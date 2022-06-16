@@ -7,15 +7,18 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 contract AsyncPlayground is ERC1155, Ownable, ReentrancyGuard {
-    enum SALE_TYPE { PRESALE, PUBLICSALE }
+    string public name = "Async Playground";
+    string public symbol = "ASYNCP";
+
+    enum SALE_TYPE { PUBLICSALE, PRESALE }
     SALE_TYPE private saleType = SALE_TYPE.PRESALE;
+    mapping(address => uint) private holdCount;
     uint8 private PRESALE_MAX_HOLD_COUNT = 1;
     uint8 private PUBLICSALE_MAX_HOLD_COUNT = 5;
     uint8[] private supplies;
-    mapping(address => uint) private holdCount;
     address[] private whitelist; 
     uint256 private currentTokenId = 0;
-    string public baseURI = "ipfs://QmTubr1R1AMgWJgQpzakZTScHbdjbHtC7Sj6sSbr25Muhf/";
+    string private baseURI = "ipfs://QmTubr1R1AMgWJgQpzakZTScHbdjbHtC7Sj6sSbr25Muhf/";
     
     constructor(uint256 _maxSupply, string memory _baseURI) ERC1155(string(abi.encodePacked(_baseURI, "{id}"))) {
         supplies = new uint8[](_maxSupply);
@@ -55,7 +58,11 @@ contract AsyncPlayground is ERC1155, Ownable, ReentrancyGuard {
     }
 
     function totalSupply() public view returns(uint256) {
-        return supplies.length;
+        return currentTokenId;
+    }
+
+    function currentHoldCount() public view returns(uint) {
+        return holdCount[msg.sender];
     }
 
     // For putting NFT on Opensea
@@ -72,7 +79,7 @@ contract AsyncPlayground is ERC1155, Ownable, ReentrancyGuard {
             maxHoldCount = PUBLICSALE_MAX_HOLD_COUNT;
         }
 
-        require(holdCount[msg.sender] <= maxHoldCount, "You can't mint more.");
+        require(holdCount[msg.sender] < maxHoldCount, "You can't mint more.");
 
         require(currentTokenId <= supplies.length - 1, "NFT is sold out.");
 
@@ -80,8 +87,8 @@ contract AsyncPlayground is ERC1155, Ownable, ReentrancyGuard {
 
         _mint(msg.sender, currentTokenId, 1, "");
 
-        currentTokenId += 1;
         supplies[currentTokenId] += 1;
         holdCount[msg.sender] += 1;
+        currentTokenId += 1;        
     }
 }
