@@ -15,9 +15,9 @@ contract AsyncPlayground is ERC1155, Ownable, ReentrancyGuard {
     mapping(address => uint) private holdCount;
     address[] private whitelist; 
     uint256 private currentTokenId = 0;
-    string public baseURI = "ipfs://QmSCFe5vvoPsSpyHZpGAW78GJ4bAuDcySCV9UnMm7B69iS/";
+    string public baseURI = "ipfs://QmTubr1R1AMgWJgQpzakZTScHbdjbHtC7Sj6sSbr25Muhf/";
     
-    constructor(uint256 _maxSupply, string memory _baseURI) ERC1155(string(abi.encodePacked(_baseURI, "{id}.json"))) {
+    constructor(uint256 _maxSupply, string memory _baseURI) ERC1155(string(abi.encodePacked(_baseURI, "{id}"))) {
         supplies = new uint8[](_maxSupply);
         for (uint256 i = 0; i < _maxSupply; i++) {
             supplies[i] = 0;
@@ -55,13 +55,13 @@ contract AsyncPlayground is ERC1155, Ownable, ReentrancyGuard {
     }
 
     function totalSupply() public view returns(uint256) {
-        return currentTokenId;
+        return supplies.length;
     }
 
     // For putting NFT on Opensea
     function uri(uint256 _tokenId) override public view returns (string memory) {
         require(_tokenId <= supplies.length - 1, "NFT does not exist");
-        return string(abi.encodePacked(baseURI, Strings.toString(_tokenId), ".json"));
+        return string(abi.encodePacked(baseURI, Strings.toString(_tokenId)));
     }
 
     function mint() public {

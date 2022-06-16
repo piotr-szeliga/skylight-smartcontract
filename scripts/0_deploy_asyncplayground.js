@@ -8,7 +8,7 @@ async function main() {
   );
   const contract = await AsyncPlayground.deploy(
     100,
-    "ipfs://QmSCFe5vvoPsSpyHZpGAW78GJ4bAuDcySCV9UnMm7B69iS/"
+    "ipfs://QmTubr1R1AMgWJgQpzakZTScHbdjbHtC7Sj6sSbr25Muhf/"
   );
 
   await contract.deployed();
