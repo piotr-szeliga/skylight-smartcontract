@@ -3,16 +3,13 @@
 const hre = require("hardhat");
 
 async function main() {
-  const AsyncPlayground = await hre.ethers.getContractFactory(
-    "AsyncPlayground"
+  const MeemosWorld = await hre.ethers.getContractFactory(
+    "MeemosWorld"
   );
-  const contract = await AsyncPlayground.deploy(
-    1000,
-    "ipfs://QmTubr1R1AMgWJgQpzakZTScHbdjbHtC7Sj6sSbr25Muhf/"
-  );
+  const contract = await MeemosWorld.deploy();
 
   await contract.deployed();
-  console.log("AsyncPlayground deployed to:", contract.address);
+  console.log("MeemosWorld deployed to:", contract.address);
 }
 
 main()
