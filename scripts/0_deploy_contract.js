@@ -3,13 +3,13 @@
 const hre = require("hardhat");
 
 async function main() {
-  const MeemosWorld = await hre.ethers.getContractFactory(
-    "MeemosWorld"
+  const Moodies = await hre.ethers.getContractFactory(
+    "Moodies"
   );
-  const contract = await MeemosWorld.deploy();
+  const contract = await Moodies.deploy("Moodies", "MDS", 100000000000000, 1000, "https://", null);
 
   await contract.deployed();
-  console.log("MeemosWorld deployed to:", contract.address);
+  console.log("Moodies deployed to:", contract.address);
 }
 
 main()
