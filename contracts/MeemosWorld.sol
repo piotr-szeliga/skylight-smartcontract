@@ -1,6 +1,6 @@
 /**
  *Submitted for verification at Etherscan.io on 2022-02-14
-*/
+ */
 
 // File @openzeppelin/contracts/utils/cryptography/MerkleProof.sol@v4.4.2
 
@@ -41,29 +41,33 @@ library MerkleProof {
      *
      * _Available since v4.4._
      */
-    function processProof(bytes32[] memory proof, bytes32 leaf) internal pure returns (bytes32) {
+    function processProof(bytes32[] memory proof, bytes32 leaf)
+        internal
+        pure
+        returns (bytes32)
+    {
         bytes32 computedHash = leaf;
         for (uint256 i = 0; i < proof.length; i++) {
             bytes32 proofElement = proof[i];
             if (computedHash <= proofElement) {
                 // Hash(current computed hash + current element of the proof)
-                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
+                computedHash = keccak256(
+                    abi.encodePacked(computedHash, proofElement)
+                );
             } else {
                 // Hash(current element of the proof + current computed hash)
-                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
+                computedHash = keccak256(
+                    abi.encodePacked(proofElement, computedHash)
+                );
             }
         }
         return computedHash;
     }
 }
 
-
 // File @openzeppelin/contracts/utils/Context.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (utils/Context.sol)
-
-
 
 /**
  * @dev Provides information about the current execution context, including the
@@ -85,13 +89,9 @@ abstract contract Context {
     }
 }
 
-
 // File @openzeppelin/contracts/access/Ownable.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (access/Ownable.sol)
-
-
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where
@@ -108,7 +108,10 @@ abstract contract Context {
 abstract contract Ownable is Context {
     address private _owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+    event OwnershipTransferred(
+        address indexed previousOwner,
+        address indexed newOwner
+    );
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
@@ -148,7 +151,10 @@ abstract contract Ownable is Context {
      * Can only be called by the current owner.
      */
     function transferOwnership(address newOwner) public virtual onlyOwner {
-        require(newOwner != address(0), "Ownable: new owner is the zero address");
+        require(
+            newOwner != address(0),
+            "Ownable: new owner is the zero address"
+        );
         _transferOwnership(newOwner);
     }
 
@@ -163,13 +169,9 @@ abstract contract Ownable is Context {
     }
 }
 
-
 // File @openzeppelin/contracts/utils/Strings.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (utils/Strings.sol)
-
-
 
 /**
  * @dev String operations.
@@ -221,7 +223,11 @@ library Strings {
     /**
      * @dev Converts a `uint256` to its ASCII `string` hexadecimal representation with fixed length.
      */
-    function toHexString(uint256 value, uint256 length) internal pure returns (string memory) {
+    function toHexString(uint256 value, uint256 length)
+        internal
+        pure
+        returns (string memory)
+    {
         bytes memory buffer = new bytes(2 * length + 2);
         buffer[0] = "0";
         buffer[1] = "x";
@@ -234,13 +240,9 @@ library Strings {
     }
 }
 
-
 // File @openzeppelin/contracts/utils/introspection/IERC165.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/IERC165.sol)
-
-
 
 /**
  * @dev Interface of the ERC165 standard, as defined in the
@@ -263,13 +265,9 @@ interface IERC165 {
     function supportsInterface(bytes4 interfaceId) external view returns (bool);
 }
 
-
 // File @openzeppelin/contracts/token/ERC721/IERC721.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/IERC721.sol)
-
-
 
 /**
  * @dev Required interface of an ERC721 compliant contract.
@@ -278,17 +276,29 @@ interface IERC721 is IERC165 {
     /**
      * @dev Emitted when `tokenId` token is transferred from `from` to `to`.
      */
-    event Transfer(address indexed from, address indexed to, uint256 indexed tokenId);
+    event Transfer(
+        address indexed from,
+        address indexed to,
+        uint256 indexed tokenId
+    );
 
     /**
      * @dev Emitted when `owner` enables `approved` to manage the `tokenId` token.
      */
-    event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId);
+    event Approval(
+        address indexed owner,
+        address indexed approved,
+        uint256 indexed tokenId
+    );
 
     /**
      * @dev Emitted when `owner` enables or disables (`approved`) `operator` to manage all of its assets.
      */
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+    event ApprovalForAll(
+        address indexed owner,
+        address indexed operator,
+        bool approved
+    );
 
     /**
      * @dev Returns the number of tokens in ``owner``'s account.
@@ -366,7 +376,10 @@ interface IERC721 is IERC165 {
      *
      * - `tokenId` must exist.
      */
-    function getApproved(uint256 tokenId) external view returns (address operator);
+    function getApproved(uint256 tokenId)
+        external
+        view
+        returns (address operator);
 
     /**
      * @dev Approve or remove `operator` as an operator for the caller.
@@ -385,7 +398,10 @@ interface IERC721 is IERC165 {
      *
      * See {setApprovalForAll}
      */
-    function isApprovedForAll(address owner, address operator) external view returns (bool);
+    function isApprovedForAll(address owner, address operator)
+        external
+        view
+        returns (bool);
 
     /**
      * @dev Safely transfers `tokenId` token from `from` to `to`.
@@ -408,13 +424,9 @@ interface IERC721 is IERC165 {
     ) external;
 }
 
-
 // File @openzeppelin/contracts/token/ERC721/IERC721Receiver.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/IERC721Receiver.sol)
-
-
 
 /**
  * @title ERC721 token receiver interface
@@ -439,13 +451,9 @@ interface IERC721Receiver {
     ) external returns (bytes4);
 }
 
-
 // File @openzeppelin/contracts/token/ERC721/extensions/IERC721Metadata.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/IERC721Metadata.sol)
-
-
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, optional metadata extension
@@ -468,13 +476,9 @@ interface IERC721Metadata is IERC721 {
     function tokenURI(uint256 tokenId) external view returns (string memory);
 }
 
-
 // File @openzeppelin/contracts/token/ERC721/extensions/IERC721Enumerable.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (token/ERC721/extensions/IERC721Enumerable.sol)
-
-
 
 /**
  * @title ERC-721 Non-Fungible Token Standard, optional enumeration extension
@@ -490,7 +494,10 @@ interface IERC721Enumerable is IERC721 {
      * @dev Returns a token ID owned by `owner` at a given `index` of its token list.
      * Use along with {balanceOf} to enumerate all of ``owner``'s tokens.
      */
-    function tokenOfOwnerByIndex(address owner, uint256 index) external view returns (uint256 tokenId);
+    function tokenOfOwnerByIndex(address owner, uint256 index)
+        external
+        view
+        returns (uint256 tokenId);
 
     /**
      * @dev Returns a token ID at a given `index` of all the tokens stored by the contract.
@@ -499,13 +506,9 @@ interface IERC721Enumerable is IERC721 {
     function tokenByIndex(uint256 index) external view returns (uint256);
 }
 
-
 // File @openzeppelin/contracts/utils/Address.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (utils/Address.sol)
-
-
 
 /**
  * @dev Collection of functions related to the address type
@@ -557,10 +560,16 @@ library Address {
      * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
      */
     function sendValue(address payable recipient, uint256 amount) internal {
-        require(address(this).balance >= amount, "Address: insufficient balance");
+        require(
+            address(this).balance >= amount,
+            "Address: insufficient balance"
+        );
 
         (bool success, ) = recipient.call{value: amount}("");
-        require(success, "Address: unable to send value, recipient may have reverted");
+        require(
+            success,
+            "Address: unable to send value, recipient may have reverted"
+        );
     }
 
     /**
@@ -581,7 +590,10 @@ library Address {
      *
      * _Available since v3.1._
      */
-    function functionCall(address target, bytes memory data) internal returns (bytes memory) {
+    function functionCall(address target, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
         return functionCall(target, data, "Address: low-level call failed");
     }
 
@@ -615,7 +627,13 @@ library Address {
         bytes memory data,
         uint256 value
     ) internal returns (bytes memory) {
-        return functionCallWithValue(target, data, value, "Address: low-level call with value failed");
+        return
+            functionCallWithValue(
+                target,
+                data,
+                value,
+                "Address: low-level call with value failed"
+            );
     }
 
     /**
@@ -630,10 +648,15 @@ library Address {
         uint256 value,
         string memory errorMessage
     ) internal returns (bytes memory) {
-        require(address(this).balance >= value, "Address: insufficient balance for call");
+        require(
+            address(this).balance >= value,
+            "Address: insufficient balance for call"
+        );
         require(isContract(target), "Address: call to non-contract");
 
-        (bool success, bytes memory returndata) = target.call{value: value}(data);
+        (bool success, bytes memory returndata) = target.call{value: value}(
+            data
+        );
         return verifyCallResult(success, returndata, errorMessage);
     }
 
@@ -643,8 +666,17 @@ library Address {
      *
      * _Available since v3.3._
      */
-    function functionStaticCall(address target, bytes memory data) internal view returns (bytes memory) {
-        return functionStaticCall(target, data, "Address: low-level static call failed");
+    function functionStaticCall(address target, bytes memory data)
+        internal
+        view
+        returns (bytes memory)
+    {
+        return
+            functionStaticCall(
+                target,
+                data,
+                "Address: low-level static call failed"
+            );
     }
 
     /**
@@ -670,8 +702,16 @@ library Address {
      *
      * _Available since v3.4._
      */
-    function functionDelegateCall(address target, bytes memory data) internal returns (bytes memory) {
-        return functionDelegateCall(target, data, "Address: low-level delegate call failed");
+    function functionDelegateCall(address target, bytes memory data)
+        internal
+        returns (bytes memory)
+    {
+        return
+            functionDelegateCall(
+                target,
+                data,
+                "Address: low-level delegate call failed"
+            );
     }
 
     /**
@@ -720,13 +760,9 @@ library Address {
     }
 }
 
-
 // File @openzeppelin/contracts/utils/introspection/ERC165.sol@v4.4.2
 
-
 // OpenZeppelin Contracts v4.4.1 (utils/introspection/ERC165.sol)
-
-
 
 /**
  * @dev Implementation of the {IERC165} interface.
@@ -746,17 +782,20 @@ abstract contract ERC165 is IERC165 {
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
         return interfaceId == type(IERC165).interfaceId;
     }
 }
 
-
 // File contracts/ERC721A.sol
 
-
 // Creator: Chiru Labs
-
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
@@ -768,7 +807,13 @@ abstract contract ERC165 is IERC165 {
  *
  * Assumes that an owner cannot have more than the 2**128 (max value of uint128) of supply
  */
-contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable {
+contract ERC721A is
+    Context,
+    ERC165,
+    IERC721,
+    IERC721Metadata,
+    IERC721Enumerable
+{
     using Address for address;
     using Strings for uint256;
 
@@ -818,8 +863,13 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
     /**
      * @dev See {IERC721Enumerable-tokenByIndex}.
      */
-    function tokenByIndex(uint256 index) public view override returns (uint256) {
-        require(index < totalSupply(), 'ERC721A: global index out of bounds');
+    function tokenByIndex(uint256 index)
+        public
+        view
+        override
+        returns (uint256)
+    {
+        require(index < totalSupply(), "ERC721A: global index out of bounds");
         return index;
     }
 
@@ -828,8 +878,13 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
      * This read function is O(totalSupply). If calling from a separate contract, be sure to test gas first.
      * It may also degrade with extremely large collection sizes (e.g >> 10000), test for your use case.
      */
-    function tokenOfOwnerByIndex(address owner, uint256 index) public view override returns (uint256) {
-        require(index < balanceOf(owner), 'ERC721A: owner index out of bounds');
+    function tokenOfOwnerByIndex(address owner, uint256 index)
+        public
+        view
+        override
+        returns (uint256)
+    {
+        require(index < balanceOf(owner), "ERC721A: owner index out of bounds");
         uint256 numMintedSoFar = totalSupply();
         uint256 tokenIdsIdx = 0;
         address currOwnershipAddr = address(0);
@@ -845,13 +900,19 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
                 tokenIdsIdx++;
             }
         }
-        revert('ERC721A: unable to get token of owner by index');
+        revert("ERC721A: unable to get token of owner by index");
     }
 
     /**
      * @dev See {IERC165-supportsInterface}.
      */
-    function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        virtual
+        override(ERC165, IERC165)
+        returns (bool)
+    {
         return
             interfaceId == type(IERC721).interfaceId ||
             interfaceId == type(IERC721Metadata).interfaceId ||
@@ -863,17 +924,27 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
      * @dev See {IERC721-balanceOf}.
      */
     function balanceOf(address owner) public view override returns (uint256) {
-        require(owner != address(0), 'ERC721A: balance query for the zero address');
+        require(
+            owner != address(0),
+            "ERC721A: balance query for the zero address"
+        );
         return uint256(_addressData[owner].balance);
     }
 
     function _numberMinted(address owner) internal view returns (uint256) {
-        require(owner != address(0), 'ERC721A: number minted query for the zero address');
+        require(
+            owner != address(0),
+            "ERC721A: number minted query for the zero address"
+        );
         return uint256(_addressData[owner].numberMinted);
     }
 
-    function ownershipOf(uint256 tokenId) internal view returns (TokenOwnership memory) {
-        require(_exists(tokenId), 'ERC721A: owner query for nonexistent token');
+    function ownershipOf(uint256 tokenId)
+        internal
+        view
+        returns (TokenOwnership memory)
+    {
+        require(_exists(tokenId), "ERC721A: owner query for nonexistent token");
 
         for (uint256 curr = tokenId; ; curr--) {
             TokenOwnership memory ownership = _ownerships[curr];
@@ -882,7 +953,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
             }
         }
 
-        revert('ERC721A: unable to determine the owner of token');
+        revert("ERC721A: unable to determine the owner of token");
     }
 
     /**
@@ -909,11 +980,23 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
     /**
      * @dev See {IERC721Metadata-tokenURI}.
      */
-    function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
-        require(_exists(tokenId), 'ERC721Metadata: URI query for nonexistent token');
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        virtual
+        override
+        returns (string memory)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721Metadata: URI query for nonexistent token"
+        );
 
         string memory baseURI = _baseURI();
-        return bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : '';
+        return
+            bytes(baseURI).length > 0
+                ? string(abi.encodePacked(baseURI, tokenId.toString()))
+                : "";
     }
 
     /**
@@ -922,7 +1005,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
      * by default, can be overriden in child contracts.
      */
     function _baseURI() internal view virtual returns (string memory) {
-        return '';
+        return "";
     }
 
     /**
@@ -930,11 +1013,11 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
      */
     function approve(address to, uint256 tokenId) public override {
         address owner = ERC721A.ownerOf(tokenId);
-        require(to != owner, 'ERC721A: approval to current owner');
+        require(to != owner, "ERC721A: approval to current owner");
 
         require(
             _msgSender() == owner || isApprovedForAll(owner, _msgSender()),
-            'ERC721A: approve caller is not owner nor approved for all'
+            "ERC721A: approve caller is not owner nor approved for all"
         );
 
         _approve(to, tokenId, owner);
@@ -943,8 +1026,16 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
     /**
      * @dev See {IERC721-getApproved}.
      */
-    function getApproved(uint256 tokenId) public view override returns (address) {
-        require(_exists(tokenId), 'ERC721A: approved query for nonexistent token');
+    function getApproved(uint256 tokenId)
+        public
+        view
+        override
+        returns (address)
+    {
+        require(
+            _exists(tokenId),
+            "ERC721A: approved query for nonexistent token"
+        );
 
         return _tokenApprovals[tokenId];
     }
@@ -952,8 +1043,11 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
     /**
      * @dev See {IERC721-setApprovalForAll}.
      */
-    function setApprovalForAll(address operator, bool approved) public override {
-        require(operator != _msgSender(), 'ERC721A: approve to caller');
+    function setApprovalForAll(address operator, bool approved)
+        public
+        override
+    {
+        require(operator != _msgSender(), "ERC721A: approve to caller");
 
         _operatorApprovals[_msgSender()][operator] = approved;
         emit ApprovalForAll(_msgSender(), operator, approved);
@@ -962,7 +1056,13 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
     /**
      * @dev See {IERC721-isApprovedForAll}.
      */
-    function isApprovedForAll(address owner, address operator) public view virtual override returns (bool) {
+    function isApprovedForAll(address owner, address operator)
+        public
+        view
+        virtual
+        override
+        returns (bool)
+    {
         return _operatorApprovals[owner][operator];
     }
 
@@ -985,7 +1085,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
         address to,
         uint256 tokenId
     ) public override {
-        safeTransferFrom(from, to, tokenId, '');
+        safeTransferFrom(from, to, tokenId, "");
     }
 
     /**
@@ -1000,7 +1100,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
         _transfer(from, to, tokenId);
         require(
             _checkOnERC721Received(from, to, tokenId, _data),
-            'ERC721A: transfer to non ERC721Receiver implementer'
+            "ERC721A: transfer to non ERC721Receiver implementer"
         );
     }
 
@@ -1016,7 +1116,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
     }
 
     function _safeMint(address to, uint256 quantity) internal {
-        _safeMint(to, quantity, '');
+        _safeMint(to, quantity, "");
     }
 
     /**
@@ -1035,10 +1135,10 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
         bytes memory _data
     ) internal {
         uint256 startTokenId = currentIndex;
-        require(to != address(0), 'ERC721A: mint to the zero address');
+        require(to != address(0), "ERC721A: mint to the zero address");
         // We know if the first token in the batch doesn't exist, the other ones don't as well, because of serial ordering.
-        require(!_exists(startTokenId), 'ERC721A: token already minted');
-        require(quantity > 0, 'ERC721A: quantity must be greater 0');
+        require(!_exists(startTokenId), "ERC721A: token already minted");
+        require(quantity > 0, "ERC721A: quantity must be greater 0");
 
         _beforeTokenTransfers(address(0), to, startTokenId, quantity);
 
@@ -1055,7 +1155,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
             emit Transfer(address(0), to, updatedIndex);
             require(
                 _checkOnERC721Received(address(0), to, updatedIndex, _data),
-                'ERC721A: transfer to non ERC721Receiver implementer'
+                "ERC721A: transfer to non ERC721Receiver implementer"
             );
             updatedIndex++;
         }
@@ -1085,10 +1185,16 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
             getApproved(tokenId) == _msgSender() ||
             isApprovedForAll(prevOwnership.addr, _msgSender()));
 
-        require(isApprovedOrOwner, 'ERC721A: transfer caller is not owner nor approved');
+        require(
+            isApprovedOrOwner,
+            "ERC721A: transfer caller is not owner nor approved"
+        );
 
-        require(prevOwnership.addr == from, 'ERC721A: transfer from incorrect owner');
-        require(to != address(0), 'ERC721A: transfer to the zero address');
+        require(
+            prevOwnership.addr == from,
+            "ERC721A: transfer from incorrect owner"
+        );
+        require(to != address(0), "ERC721A: transfer to the zero address");
 
         _beforeTokenTransfers(from, to, tokenId, 1);
 
@@ -1109,7 +1215,10 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
         uint256 nextTokenId = tokenId + 1;
         if (_ownerships[nextTokenId].addr == address(0)) {
             if (_exists(nextTokenId)) {
-                _ownerships[nextTokenId] = TokenOwnership(prevOwnership.addr, prevOwnership.startTimestamp);
+                _ownerships[nextTokenId] = TokenOwnership(
+                    prevOwnership.addr,
+                    prevOwnership.startTimestamp
+                );
             }
         }
 
@@ -1148,11 +1257,20 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
         bytes memory _data
     ) private returns (bool) {
         if (to.isContract()) {
-            try IERC721Receiver(to).onERC721Received(_msgSender(), from, tokenId, _data) returns (bytes4 retval) {
+            try
+                IERC721Receiver(to).onERC721Received(
+                    _msgSender(),
+                    from,
+                    tokenId,
+                    _data
+                )
+            returns (bytes4 retval) {
                 return retval == IERC721Receiver(to).onERC721Received.selector;
             } catch (bytes memory reason) {
                 if (reason.length == 0) {
-                    revert('ERC721A: transfer to non ERC721Receiver implementer');
+                    revert(
+                        "ERC721A: transfer to non ERC721Receiver implementer"
+                    );
                 } else {
                     assembly {
                         revert(add(32, reason), mload(reason))
@@ -1203,9 +1321,7 @@ contract ERC721A is Context, ERC165, IERC721, IERC721Metadata, IERC721Enumerable
     ) internal virtual {}
 }
 
-
 // File contracts/MeemosWorld.sol
-
 
 /**
 $$\      $$\                                           $$\               $$\      $$\                     $$\       $$\
@@ -1220,18 +1336,30 @@ $$ | \_/ $$ |\$$$$$$$\ \$$$$$$$\ $$ | $$ | $$ |\$$$$$$  |$$$$$$$  |      $$  /  
 
 interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
-    function transfer(address recipient, uint256 amount) external returns (bool);
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
+
+    function transfer(address recipient, uint256 amount)
+        external
+        returns (bool);
 }
 
 contract MeemosWorld is ERC721A, Ownable {
-
-    string public baseURI = "ipfs://QmPy95f9sUv5DcMTy7koxQhDzWLzC2DnkvciJEx167oAws/";
-    string public contractURI = "ipfs://QmYpYeFLYJzb96RmgvC6Qn8g1Mnh1Vn1NAw4rYUg77TeBo";
+    string public baseURI =
+        "ipfs://QmPy95f9sUv5DcMTy7koxQhDzWLzC2DnkvciJEx167oAws/";
+    string public contractURI =
+        "ipfs://QmYpYeFLYJzb96RmgvC6Qn8g1Mnh1Vn1NAw4rYUg77TeBo";
     string public constant baseExtension = ".json";
-    bytes32 public merkleRoot = 0x1db1ef3dbf045e962d6d48a27c27b2797cc991082e2037021f68af3b5246f7b5;
-    address public constant proxyRegistryAddress = 0xa5409ec958C83C3f309868babACA7c86DCB077c1;
-    IERC20 public constant SOSContract = IERC20(0x3b484b82567a09e2588A13D54D032153f0c0aEe0);
+    bytes32 public merkleRoot =
+        0x1db1ef3dbf045e962d6d48a27c27b2797cc991082e2037021f68af3b5246f7b5;
+    address public constant proxyRegistryAddress =
+        0xa5409ec958C83C3f309868babACA7c86DCB077c1;
+    IERC20 public constant SOSContract =
+        IERC20(0x3b484b82567a09e2588A13D54D032153f0c0aEe0);
 
     uint256 public MAX_SUPPLY = 6666;
 
@@ -1249,39 +1377,69 @@ contract MeemosWorld is ERC721A, Ownable {
 
     function mint(uint256 _amount, bool _mintWithEther) external payable {
         address _caller = _msgSender();
-        require(publicSale == true && whiteListSale == false, "Public sale not active");
+        require(
+            publicSale == true && whiteListSale == false,
+            "Public sale not active"
+        );
         require(MAX_SUPPLY >= totalSupply() + _amount, "Exceeds max supply");
         require(_amount > 0, "No 0 mints");
         require(tx.origin == _caller, "No contracts");
-        require(MAX_PER_TX_PUBLIC >= _amount , "Excess max per public tx");
-        require(MAX_PER_WALLET >= _numberMinted(_caller) + _amount, "Max mints per wallet");
+        require(MAX_PER_TX_PUBLIC >= _amount, "Excess max per public tx");
+        require(
+            MAX_PER_WALLET >= _numberMinted(_caller) + _amount,
+            "Max mints per wallet"
+        );
 
-        if(_mintWithEther){
+        if (_mintWithEther) {
             require(_amount * price == msg.value, "Invalid funds provided");
-        }else{
-            require(SOSContract.transferFrom(_caller, address(this), _amount * sos_price), "Invalid sos funds provided");
+        } else {
+            require(
+                SOSContract.transferFrom(
+                    _caller,
+                    address(this),
+                    _amount * sos_price
+                ),
+                "Invalid sos funds provided"
+            );
         }
 
         _safeMint(_caller, _amount);
     }
 
-    function whitelistMint(uint256 _amount, bool _mintWithEther, bytes32[] calldata _merkleProof) external payable {
+    function whitelistMint(
+        uint256 _amount,
+        bool _mintWithEther,
+        bytes32[] calldata _merkleProof
+    ) external payable {
         address _caller = _msgSender();
         require(whiteListSale == true, "Whitelist sale not active");
         require(MAX_SUPPLY >= totalSupply() + _amount, "Exceeds max supply");
         require(_amount > 0, "No 0 mints");
         require(tx.origin == _caller, "No contracts");
-        require(MAX_PER_TX_WL >= _amount , "Excess max per whitelist tx");
-        require(MAX_PER_TX_WL >= _numberMinted(_caller) + _amount, "Max mints per whitelist wallet");
+        require(MAX_PER_TX_WL >= _amount, "Excess max per whitelist tx");
+        require(
+            MAX_PER_TX_WL >= _numberMinted(_caller) + _amount,
+            "Max mints per whitelist wallet"
+        );
 
-        if(_mintWithEther){
+        if (_mintWithEther) {
             require(_amount * price == msg.value, "Invalid funds provided");
-        }else{
-            require(SOSContract.transferFrom(_caller, address(this), _amount * sos_price), "Invalid sos funds provided");
+        } else {
+            require(
+                SOSContract.transferFrom(
+                    _caller,
+                    address(this),
+                    _amount * sos_price
+                ),
+                "Invalid sos funds provided"
+            );
         }
 
         bytes32 leaf = keccak256(abi.encodePacked(_caller));
-        require(MerkleProof.verify(_merkleProof, merkleRoot, leaf), "Invalid proof");
+        require(
+            MerkleProof.verify(_merkleProof, merkleRoot, leaf),
+            "Invalid proof"
+        );
 
         _safeMint(_caller, _amount);
     }
@@ -1293,9 +1451,9 @@ contract MeemosWorld is ERC721A, Ownable {
     }
 
     function isApprovedForAll(address owner, address operator)
-        override
         public
         view
+        override
         returns (bool)
     {
         // Whitelist OpenSea proxy contract for easy trading.
@@ -1352,23 +1510,32 @@ contract MeemosWorld is ERC721A, Ownable {
         sos_price = _price;
     }
 
-    function walletMints(address owner) public view returns(uint256) {
-       return _numberMinted(owner);
+    function walletMints(address owner) public view returns (uint256) {
+        return _numberMinted(owner);
     }
 
-    function tokenURI(uint256 _tokenId) public view override returns (string memory) {
+    function tokenURI(uint256 _tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
         require(_exists(_tokenId), "Token does not exist.");
-        return bytes(baseURI).length > 0 ? string(
-            abi.encodePacked(
-              baseURI,
-              Strings.toString(_tokenId),
-              baseExtension
-            )
-        ) : "";
+        return
+            bytes(baseURI).length > 0
+                ? string(
+                    abi.encodePacked(
+                        baseURI,
+                        Strings.toString(_tokenId),
+                        baseExtension
+                    )
+                )
+                : "";
     }
 }
 
-contract OwnableDelegateProxy { }
+contract OwnableDelegateProxy {}
+
 contract ProxyRegistry {
     mapping(address => OwnableDelegateProxy) public proxies;
 }
