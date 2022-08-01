@@ -16,7 +16,7 @@ contract Moodies is ERC721A, ERC721ABurnable, Ownable {
     uint256 public price;
     uint256 public maxQuantity;
     uint256 locked;
-    uint256 maxMintedCount;
+    uint256 maxMintableCount;
     uint256 allowListRequired;
     string baseURI;
     address proxyRegistryAddress;
@@ -34,7 +34,7 @@ contract Moodies is ERC721A, ERC721ABurnable, Ownable {
         price = initPrice;
         maxQuantity = initQuantity;
         locked = 0;
-        maxMintedCount = 5;
+        maxMintableCount = 5;
         allowListRequired = 0;
         baseURI = uri;
         proxyRegistryAddress = proxy;
@@ -43,9 +43,9 @@ contract Moodies is ERC721A, ERC721ABurnable, Ownable {
     function isOnAllowlist(
         bytes32[] memory _proof,
         address _claimer,
-        uint256 _amount
+        uint256 _maxMintableCount
     ) public view returns (bool) {
-        bytes32 leaf = keccak256(abi.encodePacked(_claimer, _amount));
+        bytes32 leaf = keccak256(abi.encodePacked(_claimer, _maxMintableCount));
         return MerkleProof.verify(_proof, merkleRoot, leaf);
     }
 
@@ -53,16 +53,16 @@ contract Moodies is ERC721A, ERC721ABurnable, Ownable {
         merkleRoot = _merkleRoot;
     }
 
-    function setMaxMintedCount(uint256 _max) public onlyOwner {
-        maxMintedCount = _max;
+    function setMaxMintableCount(uint256 _max) public onlyOwner {
+        maxMintableCount = _max;
     }
 
-    function setMerkleRootAndMaxMintedCount(
+    function setMerkleRootAndMaxMintableCount(
         bytes32 _merkleRoot,
-        uint256 _maxMintedCount
+        uint256 _maxMintableCount
     ) public onlyOwner {
         merkleRoot = _merkleRoot;
-        maxMintedCount = _maxMintedCount;
+        maxMintableCount = _maxMintableCount;
     }
 
     function setPrice(uint256 _price) public onlyOwner {
@@ -130,10 +130,13 @@ contract Moodies is ERC721A, ERC721ABurnable, Ownable {
             "Cannot mint that many tokens."
         );
         require(
-            _quantity <= maxMintedCount,
+            _quantity <= maxMintableCount,
             "Cannot mint that many tokens per call."
         );
-        require(mintedCount[msg.sender] < maxMintedCount, "Cannot mint more.");
+        require(
+            mintedCount[msg.sender] + _quantity <= maxMintableCount,
+            "Cannot mint more."
+        );
         require(msg.value == _quantity * price, "Not enough to pay for that");
 
         _mint(msg.sender, _quantity);
@@ -144,19 +147,25 @@ contract Moodies is ERC721A, ERC721ABurnable, Ownable {
     function mintAllowed(
         uint256 _quantity,
         bytes32[] memory _proof,
-        uint256 _amount
+        uint256 _maxMintableCount
     ) external payable {
         require(allowListRequired == 1, "Allow list is disabled.");
         require(
-            isOnAllowlist(_proof, _msgSender(), _amount),
+            isOnAllowlist(_proof, _msgSender(), _maxMintableCount),
             "You are not on the allow list."
         );
         require(
             _totalMinted() + _quantity <= maxQuantity,
             "Cannot mint that many tokens."
         );
-        require(_quantity <= _amount, "Cannot mint that many tokens per call.");
-        require(mintedCount[msg.sender] < _amount, "Cannot mint more.");
+        require(
+            _quantity <= _maxMintableCount,
+            "Cannot mint that many tokens per call."
+        );
+        require(
+            mintedCount[msg.sender] + _quantity <= _maxMintableCount,
+            "Cannot mint more."
+        );
         require(msg.value == _quantity * price, "Not enough to pay for that");
 
         _mint(msg.sender, _quantity);

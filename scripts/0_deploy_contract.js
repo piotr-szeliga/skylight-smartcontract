@@ -9,7 +9,7 @@ async function main() {
     "MDS",
     100000000000000,
     1000,
-    "ipfs://QmTubr1R1AMgWJgQpzakZTScHbdjbHtC7Sj6sSbr25Muhf/",
+    "ipfs://bafybeifv2jje4fwjru7iqiphj2h5lpeoqq6zjsz4czpzojq7w7tvo4hi3m/",
     "0xb7dE241d7E6f64CcBea73eECDbD91E949A7461dd"
   );
 
