@@ -15,13 +15,13 @@ contract ProxyRegistry {
 contract Moodies is ERC721A, ERC721ABurnable, Ownable {
     uint256 public price;
     uint256 public maxQuantity;
-    uint256 locked;
-    uint256 maxMintableCount;
+    uint256 maxPerWallet;
     uint256 allowListRequired;
+    string contractURL;
     string baseURI;
     address proxyRegistryAddress;
     bytes32 public merkleRoot;
-    mapping(address => uint256) private mintedCount;
+    mapping(address => uint256) private _minted;
 
     constructor(
         string memory name,
@@ -33,71 +33,67 @@ contract Moodies is ERC721A, ERC721ABurnable, Ownable {
     ) ERC721A(name, symbol) {
         price = initPrice;
         maxQuantity = initQuantity;
-        locked = 0;
-        maxMintableCount = 5;
-        allowListRequired = 0;
+        maxPerWallet = 0;
+        allowListRequired = 1;
         baseURI = uri;
         proxyRegistryAddress = proxy;
     }
 
-    function isOnAllowlist(
-        bytes32[] memory _proof,
-        address _claimer,
-        uint256 _maxMintableCount
-    ) public view returns (bool) {
-        bytes32 leaf = keccak256(abi.encodePacked(_claimer, _maxMintableCount));
+    function isOnAllowlist(bytes32[] memory _proof, address _claimer)
+        public
+        view
+        returns (bool)
+    {
+        bytes32 leaf = keccak256(abi.encodePacked(_claimer));
         return MerkleProof.verify(_proof, merkleRoot, leaf);
     }
 
+    // set merkle root
     function setMerkleRoot(bytes32 _merkleRoot) public onlyOwner {
         merkleRoot = _merkleRoot;
     }
 
-    function setMaxMintableCount(uint256 _max) public onlyOwner {
-        maxMintableCount = _max;
-    }
-
-    function setMerkleRootAndMaxMintableCount(
+    // set merkle root and maxperWallet
+    function setMerkleRootAndMaxPerWallet(
         bytes32 _merkleRoot,
-        uint256 _maxMintableCount
+        uint256 _maxPerWallet
     ) public onlyOwner {
         merkleRoot = _merkleRoot;
-        maxMintableCount = _maxMintableCount;
+        maxPerWallet = _maxPerWallet;
     }
 
-    function setPrice(uint256 _price) public onlyOwner {
-        price = _price;
+    function setMaxPerWallet(uint256 max) public onlyOwner {
+        maxPerWallet = max;
     }
 
-    function setMaxQuantity(uint256 _maxQantity) public onlyOwner {
-        require(locked == 0, "Contract is locked.");
-        require(
-            _maxQantity > _totalMinted(),
-            "Cannot set max quantity to less than total minted."
-        );
-        maxQuantity = _maxQantity;
+    function setPrice(uint256 newPrice) public onlyOwner {
+        price = newPrice;
     }
 
     function setBaseURI(string memory newBaseURI) public onlyOwner {
         baseURI = newBaseURI;
     }
 
-    function lock() public onlyOwner {
-        locked = 1;
-    }
-
     // Set allowlisting on/off (1/0)
-    function setAllowListRequired(uint256 _value) public onlyOwner {
-        allowListRequired = _value;
-    }
-
-    function isAllowListRequired() public view returns (uint256) {
-        return allowListRequired;
+    function setAllowListRequired(uint256 value) public onlyOwner {
+        allowListRequired = value;
     }
 
     function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;
         payable(msg.sender).transfer(balance);
+    }
+
+    function contractURI() public view returns (string memory) {
+        return contractURL;
+    }
+
+    function mintedBalanceOf(address _address) public view returns (uint256) {
+        return _minted[_address];
+    }
+
+    function setContractURI(string memory _contractURL) public onlyOwner {
+        contractURL = _contractURL;
     }
 
     /**
@@ -108,69 +104,52 @@ contract Moodies is ERC721A, ERC721ABurnable, Ownable {
         proxyRegistryAddress = _a;
     }
 
-    function airdrop(address[] memory _addresses) public onlyOwner {
-        uint256 length = _addresses.length;
+    function airdrop(address[] memory addresses) public onlyOwner {
+        uint256 length = addresses.length;
         require(
             _totalMinted() + length <= maxQuantity,
             "Cannot mint that many tokens."
         );
         for (uint256 i = 0; i < length; i++) {
-            _mint(_addresses[i], 1);
+            _mint(addresses[i], 1);
         }
     }
 
-    function currentMintedCount() public view returns (uint256) {
-        return mintedCount[msg.sender];
-    }
-
-    function mintPublic(uint256 _quantity) external payable {
+    function mintPublic(uint256 quantity) external payable {
         require(allowListRequired == 0, "Must use the allow list.");
         require(
-            _totalMinted() + _quantity <= maxQuantity,
+            _totalMinted() + quantity <= maxQuantity,
             "Cannot mint that many tokens."
         );
         require(
-            _quantity <= maxMintableCount,
-            "Cannot mint that many tokens per call."
+            _minted[_msgSender()] + quantity <= maxPerWallet,
+            "Cannot mint that many tokens."
         );
-        require(
-            mintedCount[msg.sender] + _quantity <= maxMintableCount,
-            "Cannot mint more."
-        );
-        require(msg.value == _quantity * price, "Not enough to pay for that");
-
-        _mint(msg.sender, _quantity);
-
-        mintedCount[msg.sender] += _quantity;
+        require(msg.value >= quantity * price, "Not enough to pay for that");
+        _mint(msg.sender, quantity);
+        _minted[_msgSender()] = _minted[_msgSender()] + quantity;
     }
 
-    function mintAllowed(
-        uint256 _quantity,
-        bytes32[] memory _proof,
-        uint256 _maxMintableCount
-    ) external payable {
+    function mintAllowed(uint256 quantity, bytes32[] memory _proof)
+        external
+        payable
+    {
         require(allowListRequired == 1, "Allow list is disabled.");
         require(
-            isOnAllowlist(_proof, _msgSender(), _maxMintableCount),
+            isOnAllowlist(_proof, _msgSender()),
             "You are not on the allow list."
         );
         require(
-            _totalMinted() + _quantity <= maxQuantity,
+            _totalMinted() + quantity <= maxQuantity,
             "Cannot mint that many tokens."
         );
         require(
-            _quantity <= _maxMintableCount,
-            "Cannot mint that many tokens per call."
+            _minted[_msgSender()] + quantity <= maxPerWallet,
+            "Cannot mint that many tokens."
         );
-        require(
-            mintedCount[msg.sender] + _quantity <= _maxMintableCount,
-            "Cannot mint more."
-        );
-        require(msg.value == _quantity * price, "Not enough to pay for that");
-
-        _mint(msg.sender, _quantity);
-
-        mintedCount[msg.sender] += _quantity;
+        require(msg.value >= quantity * price, "Not enough to pay for that");
+        _mint(msg.sender, quantity);
+        _minted[_msgSender()] = _minted[_msgSender()] + quantity;
     }
 
     function isApprovedForAll(address _owner, address _operator)
