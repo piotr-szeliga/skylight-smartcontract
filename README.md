@@ -1,4 +1,4 @@
-# Async Playground
+# Smart Contract Compile & Deploy
 
 ```
 $ npx hardhat compile
