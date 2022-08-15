@@ -5,10 +5,13 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface IShadowFiToken {
-
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    event Approval(
+        address indexed owner,
+        address indexed spender,
+        uint256 value
+    );
 
     function totalSupply() external view returns (uint256);
 
@@ -16,7 +19,10 @@ interface IShadowFiToken {
 
     function transfer(address to, uint256 amount) external returns (bool);
 
-    function allowance(address owner, address spender) external view returns (uint256);
+    function allowance(address owner, address spender)
+        external
+        view
+        returns (uint256);
 
     function approve(address spender, uint256 amount) external returns (bool);
 
@@ -41,7 +47,12 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
     uint32 private startTime;
     uint32 private stopTime;
 
-    event buyTokens(address indexed user, uint256 amount, uint256 bnb, bool discounted);
+    event buyTokens(
+        address indexed user,
+        uint256 amount,
+        uint256 bnb,
+        bool discounted
+    );
 
     constructor(address _token) {
         token = IShadowFiToken(_token);
@@ -54,30 +65,51 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
         startTime = uint32(0);
         stopTime = uint32(0);
     }
-    
+
     /*******************************************************************************************************/
     /************************************* Admin Functions *************************************************/
     /*******************************************************************************************************/
 
-    function approveTokens(address _tokenAddress, uint256 _amount) public onlyOwner {
+    function approveTokens(address _tokenAddress, uint256 _amount)
+        public
+        onlyOwner
+    {
         require(address(token) == _tokenAddress, "Invalid token is provided.");
-        require(_amount <= token.balanceOf(address(msg.sender)), "Insufficient token balance in your wallet.");
+        require(
+            _amount <= token.balanceOf(address(msg.sender)),
+            "Insufficient token balance in your wallet."
+        );
 
         token.approve(address(this), _amount);
     }
 
-    function depositTokens(address _tokenAddress, uint256 _amount) public onlyOwner {
+    function depositTokens(address _tokenAddress, uint256 _amount)
+        public
+        onlyOwner
+    {
         require(address(token) == _tokenAddress, "Invalid token is provided.");
-        require(_amount <= token.balanceOf(address(msg.sender)), "Insufficient token balance in your wallet.");
+        require(
+            _amount <= token.balanceOf(address(msg.sender)),
+            "Insufficient token balance in your wallet."
+        );
 
         token.transferFrom(address(msg.sender), address(this), _amount);
         availableForSale += _amount;
     }
 
-    function withdrawTokens(address _tokenAddress, uint256 _amount) public onlyOwner {
+    function withdrawTokens(address _tokenAddress, uint256 _amount)
+        public
+        onlyOwner
+    {
         require(address(token) == _tokenAddress, "Invalid token is provided.");
-        require(_amount <= token.balanceOf(address(this)), "Insufficient token balance in contract.");
-        require(_amount <= availableForSale, "Insufficient token balance in contract.");
+        require(
+            _amount <= token.balanceOf(address(this)),
+            "Insufficient token balance in contract."
+        );
+        require(
+            _amount <= availableForSale,
+            "Insufficient token balance in contract."
+        );
 
         token.transfer(address(msg.sender), _amount);
         availableForSale -= _amount;
@@ -94,14 +126,23 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
     }
 
     function setDiscount(uint256 _discountPercent) public onlyOwner {
-        require(_discountPercent > 1 && _discountPercent < 1001, "Invalid percent is provided.");
+        require(
+            _discountPercent > 1 && _discountPercent < 1001,
+            "Invalid percent is provided."
+        );
 
         discountPercent = _discountPercent;
     }
 
-    function setStartandStopTime(uint32 _startTime, uint32 _stopTime) public onlyOwner {
+    function setStartandStopTime(uint32 _startTime, uint32 _stopTime)
+        public
+        onlyOwner
+    {
         require(_stopTime > _startTime, "Stop time must be after start time.");
-        require(_stopTime > block.timestamp, "Stop time must be before current time.");
+        require(
+            _stopTime > block.timestamp,
+            "Stop time must be before current time."
+        );
 
         startTime = _startTime;
         stopTime = _stopTime;
@@ -119,7 +160,7 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
     /*******************************************************************************************************/
     /************************************** User Functions *************************************************/
     /*******************************************************************************************************/
-    
+
     function tokenAddress() public view returns (address) {
         return address(token);
     }
@@ -128,7 +169,11 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
         return availableForSale;
     }
 
-    function totalBoughtByUserTokenAmount(address account) public view returns (uint256) {
+    function totalBoughtByUserTokenAmount(address account)
+        public
+        view
+        returns (uint256)
+    {
         return totalBoughtByUser[account];
     }
 
@@ -161,9 +206,18 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
     }
 
     function buy(uint256 _amount) external payable {
-        require(_amount <= token.balanceOf(address(this)), "Insufficient token balance in contract");
-        require(_amount <= availableForSale, "Insufficient token balance in contract.");
-        require(_amount + totalBoughtByUser[msg.sender] <= maxAmount, "Can not buy these many tokens.");
+        require(
+            _amount <= token.balanceOf(address(this)),
+            "Insufficient token balance in contract"
+        );
+        require(
+            _amount <= availableForSale,
+            "Insufficient token balance in contract."
+        );
+        require(
+            _amount + totalBoughtByUser[msg.sender] <= maxAmount,
+            "Can not buy these many tokens."
+        );
         require(block.timestamp >= startTime, "Presale is not started.");
         require(block.timestamp <= stopTime, "Presale is ended.");
 
