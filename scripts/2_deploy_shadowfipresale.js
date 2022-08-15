@@ -5,7 +5,7 @@ const hre = require("hardhat");
 async function main() {
   const ShadowFiPresale = await hre.ethers.getContractFactory("ShadowFiPresale");
   const contract = await ShadowFiPresale.deploy(
-    "0xb7dE241d7E6f64CcBea73eECDbD91E949A7461dd"
+    "0xdCd8271a7C3Dd07866228d058Da2A50d7eCD2be3"
   );
 
   await contract.deployed();
