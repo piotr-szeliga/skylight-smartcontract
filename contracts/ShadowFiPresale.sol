@@ -95,10 +95,6 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
             _amount <= token.balanceOf(address(this)),
             "Insufficient token balance in contract."
         );
-        require(
-            _amount <= availableForSale,
-            "Insufficient token balance in contract."
-        );
 
         token.transfer(address(msg.sender), _amount);
         availableForSale -= _amount;
@@ -195,6 +191,8 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
     }
 
     function buy(uint256 _amount) external payable {
+        require(block.timestamp >= startTime, "Presale is not started.");
+        require(block.timestamp <= stopTime, "Presale is ended.");
         require(
             _amount <= token.balanceOf(address(this)),
             "Insufficient token balance in contract"
@@ -207,8 +205,6 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
             _amount + totalBoughtByUser[msg.sender] <= maxAmount,
             "Can not buy these many tokens."
         );
-        require(block.timestamp >= startTime, "Presale is not started.");
-        require(block.timestamp <= stopTime, "Presale is ended.");
 
         uint8 decimals = token.decimals();
         uint256 cost = tokenCost;
