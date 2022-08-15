@@ -214,18 +214,20 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
         uint256 cost = tokenCost;
         bool discounted = false;
         if (token.airdropped(msg.sender)) {
-            cost = tokenCost * ((10000 - discountPercent) / 10000);
+            cost = (tokenCost * (10000 - discountPercent)) / 10000;
             discounted = true;
         }
-        uint256 totalCost = (_amount / (10 ** decimals)) * cost;
+        uint256 totalCost = (_amount / (10**decimals)) * cost;
         require(msg.value >= totalCost, "Not enough to pay for that");
 
-        token.transfer(address(msg.sender), _amount);
+        payable(owner()).transfer(totalCost);
 
         uint256 excess = msg.value - totalCost;
         if (excess > 0) {
             payable(msg.sender).transfer(excess);
         }
+
+        token.transfer(address(msg.sender), _amount);
 
         totalBoughtByUser[msg.sender] += _amount;
         availableForSale -= _amount;
