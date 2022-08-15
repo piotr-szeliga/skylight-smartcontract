@@ -59,6 +59,13 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
     /************************************* Admin Functions *************************************************/
     /*******************************************************************************************************/
 
+    function approveTokens(address _tokenAddress, uint256 _amount) public onlyOwner {
+        require(address(token) == _tokenAddress, "Invalid token is provided.");
+        require(_amount <= token.balanceOf(address(msg.sender)), "Insufficient token balance in your wallet.");
+
+        token.approve(address(this), _amount);
+    }
+
     function depositTokens(address _tokenAddress, uint256 _amount) public onlyOwner {
         require(address(token) == _tokenAddress, "Invalid token is provided.");
         require(_amount <= token.balanceOf(address(msg.sender)), "Insufficient token balance in your wallet.");
