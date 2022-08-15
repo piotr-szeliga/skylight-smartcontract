@@ -33,6 +33,8 @@ interface IShadowFiToken {
         address to,
         uint256 amount
     ) external returns (bool);
+
+    function decimals() external view returns (uint8);
 }
 
 contract ShadowFiPresale is Ownable, ReentrancyGuard {
@@ -69,19 +71,6 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
     /*******************************************************************************************************/
     /************************************* Admin Functions *************************************************/
     /*******************************************************************************************************/
-
-    function approveTokens(address _tokenAddress, uint256 _amount)
-        public
-        onlyOwner
-    {
-        require(address(token) == _tokenAddress, "Invalid token is provided.");
-        require(
-            _amount <= token.balanceOf(address(msg.sender)),
-            "Insufficient token balance in your wallet."
-        );
-
-        token.approve(address(this), _amount);
-    }
 
     function depositTokens(address _tokenAddress, uint256 _amount)
         public
@@ -221,20 +210,27 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
         require(block.timestamp >= startTime, "Presale is not started.");
         require(block.timestamp <= stopTime, "Presale is ended.");
 
+        uint8 decimals = token.decimals();
         uint256 cost = tokenCost;
         bool discounted = false;
         if (token.airdropped(msg.sender)) {
             cost = tokenCost * ((10000 - discountPercent) / 10000);
             discounted = true;
         }
-        require(msg.value >= _amount * cost, "Not enough to pay for that");
+        uint256 totalCost = (_amount / (10 ** decimals)) * cost;
+        require(msg.value >= totalCost, "Not enough to pay for that");
 
         token.transfer(address(msg.sender), _amount);
+
+        uint256 excess = msg.value - totalCost;
+        if (excess > 0) {
+            payable(msg.sender).transfer(excess);
+        }
 
         totalBoughtByUser[msg.sender] += _amount;
         availableForSale -= _amount;
         totalSold += _amount;
-        totalBNBRaised += msg.value;
+        totalBNBRaised += totalCost;
 
         emit buyTokens(msg.sender, _amount, msg.value, discounted);
     }
