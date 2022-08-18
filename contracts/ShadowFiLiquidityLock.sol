@@ -515,28 +515,42 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     /*******************************************************************************************************/
     /************************************* Public Functions ************************************************/
     /*******************************************************************************************************/
-    function addLiquidity(uint256 amountToken) external payable {
-        require(amountToken > 0, "Invalid parameter is provided.");
+    function addLiquidity(uint256 _amountToken) external payable {
+        require(_amountToken > 0, "Invalid parameter is provided.");
         require(msg.value > 0, "You should fund this contract with BNB.");
 
         shadowFiToken.transferFrom(
             address(msg.sender),
             address(this),
-            amountToken
+            _amountToken
         );
 
-        shadowFiToken.approve(address(pancakeRouter), amountToken);
+        shadowFiToken.approve(address(pancakeRouter), _amountToken);
 
-        (, , uint256 liquidity) = pancakeRouter.addLiquidityETH{
-            value: msg.value
-        }(
-            address(shadowFiToken),
-            amountToken,
-            0,
-            0,
-            address(this),
-            block.timestamp + 120
-        );
+        (
+            uint256 amountToken,
+            uint256 amountBNB,
+            uint256 liquidity
+        ) = pancakeRouter.addLiquidityETH{value: msg.value}(
+                address(shadowFiToken),
+                _amountToken,
+                0,
+                0,
+                address(this),
+                block.timestamp + 120
+            );
+
+        // Return excess token and BNB
+        uint256 excessAmountToken = _amountToken - amountToken;
+        uint256 excessAmountBNB = msg.value - amountBNB;
+
+        if (excessAmountToken > 0) {
+            shadowFiToken.transfer(msg.sender, excessAmountToken);
+        }
+
+        if (excessAmountBNB > 0) {
+            payable(msg.sender).transfer(excessAmountBNB);
+        }
 
         emit addedLiquidity(liquidity);
     }
