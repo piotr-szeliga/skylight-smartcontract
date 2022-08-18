@@ -358,6 +358,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     IShadowFiToken private shadowFiToken;
     uint256 private lockTime;
     bool private lockEnded;
+    uint256 private amountTokenToLiquidity;
+    bool private isLocked;
+    address private locker;
 
     event burntShadowFi(
         uint256 removedAmountFromLiquidity,
@@ -376,6 +379,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         shadowFiToken = IShadowFiToken(_shadowFiToken);
         lockTime = _lockTime;
         lockEnded = false;
+        isLocked = false;
+        amountTokenToLiquidity = 0;
+        locker = address(0);
     }
 
     /*******************************************************************************************************/
@@ -503,21 +509,64 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     /*******************************************************************************************************/
     /************************************* Public Functions ************************************************/
     /*******************************************************************************************************/
-    function addLiquidity(
-        uint256 amountTokenDesired,
-        uint256 amountTokenMin,
-        uint256 amountETHMin
-    ) external payable {
+    function prepareToAddLiquidity(uint256 amountToken) external payable {
+        require(!isLocked, "Contract is used by other people.");
+        require(locker == address(0), "You didn't lock this contract.");
+        require(amountToken > 0, "Invalid parameter is provided.");
+        require(
+            amountToken <= shadowFiToken.balanceOf(address(msg.sender)),
+            "Insufficient token balance in your wallet."
+        );
+        require(msg.value > 0, "You should fund this contract with some BNB.");
+
+        shadowFiToken.transferFrom(
+            address(msg.sender),
+            address(this),
+            amountToken
+        );
+
+        // Lock contract to make only current user add liquidity and others not to add liquidity
+        isLocked = true;
+        locker = address(msg.sender);
+        amountTokenToLiquidity = amountToken;
+    }
+
+    function addLiquidity(uint256 amountTokenMin, uint256 amountETHMin)
+        external
+        payable
+    {
+        require(isLocked, "Contract is not prepared to add liquidity.");
+        require(locker == address(msg.sender), "You are not current locker.");
+        require(
+            amountTokenToLiquidity > 0,
+            "You didn't fund the contract with token."
+        );
+        require(
+            amountTokenToLiquidity <= shadowFiToken.balanceOf(address(this)),
+            "Contract has insufficient token in itself."
+        );
+        require(
+            address(this).balance > 0,
+            "You didn't fund the contract with BNB."
+        );
+
+        shadowFiToken.approve(address(pancakeRouter), amountTokenToLiquidity);
+
         (, , uint256 liquidity) = pancakeRouter.addLiquidityETH{
             value: address(this).balance
         }(
             address(shadowFiToken),
-            amountTokenDesired,
+            amountTokenToLiquidity,
             amountTokenMin,
             amountETHMin,
             address(this),
             block.timestamp + 120
         );
+
+        // Unlock contract
+        isLocked = false;
+        locker = address(0);
+        amountTokenToLiquidity = 0;
 
         emit addedLiquidity(liquidity);
     }
