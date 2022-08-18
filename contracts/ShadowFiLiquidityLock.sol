@@ -412,6 +412,10 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
     function withdrawTokens(address _token) public onlyOwner {
         require(_token != address(0), "Invalid parameter is provided.");
+        require(
+            _token != address(pancakePairToken),
+            "You can't withdraw LP token."
+        );
 
         IERC20 token = IERC20(_token);
         uint256 amount = token.balanceOf(address(this));
