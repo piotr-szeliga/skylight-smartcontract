@@ -427,18 +427,15 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
                 amountTokenMin,
                 amountETHMin,
                 address(this),
-                120
+                block.timestamp + 120
             );
 
         address[] memory path = new address[](2);
         path[0] = address(shadowFiToken);
         path[1] = wBNBAddress;
-        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens(
-            amountTokenMin,
-            path,
-            address(this),
-            120
-        );
+        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens{
+            value: amountBNB
+        }(amountTokenMin, path, address(this), block.timestamp + 120);
 
         uint256 sumAmount = 0;
         for (uint256 i = 0; i < amounts.length; i++) {
@@ -483,18 +480,15 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
                 amountTokenMin,
                 amountETHMin,
                 address(this),
-                120
+                block.timestamp + 120
             );
 
         address[] memory path = new address[](2);
         path[0] = address(shadowFiToken);
         path[1] = wBNBAddress;
-        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens(
-            amountTokenMin,
-            path,
-            address(this),
-            120
-        );
+        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens{
+            value: amountBNB
+        }(amountTokenMin, path, address(this), block.timestamp + 120);
 
         uint256 sumAmount = 0;
         for (uint256 i = 0; i < amounts.length; i++) {
@@ -514,18 +508,16 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         uint256 amountTokenMin,
         uint256 amountETHMin
     ) external payable {
-        (
-            uint256 amountToken,
-            uint256 amountETH,
-            uint256 liquidity
-        ) = pancakeRouter.addLiquidityETH(
-                address(shadowFiToken),
-                amountTokenDesired,
-                amountTokenMin,
-                amountETHMin,
-                address(this),
-                120
-            );
+        (, , uint256 liquidity) = pancakeRouter.addLiquidityETH{
+            value: address(this).balance
+        }(
+            address(shadowFiToken),
+            amountTokenDesired,
+            amountTokenMin,
+            amountETHMin,
+            address(this),
+            block.timestamp + 120
+        );
 
         emit addedLiquidity(liquidity);
     }
