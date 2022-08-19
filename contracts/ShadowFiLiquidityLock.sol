@@ -488,7 +488,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     function buyAndBurnExcess() public onlyOwner {
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = pancakePairToken.balanceOf(address(this)) / pancakePairToken.totalSupply();
-        uint256 liquidTokens = shadowFiToken.balanceOf(address(pancakePairToken) * lpOwnershipPercent);
+        uint256 liquidTokens = shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent;
         uint256 liquidPercent = (liquidTokens / shadowFiToken.totalSupply()) * 10000;
 
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
@@ -514,7 +514,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     function buyAndBurnExcessAmount(uint256 percent) public onlyOwner {
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = pancakePairToken.balanceOf(address(this)) / pancakePairToken.totalSupply();
-        uint256 liquidTokens = shadowFiToken.balanceOf(address(pancakePairToken) * lpOwnershipPercent);
+        uint256 liquidTokens = shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent;
         uint256 liquidPercent = (liquidTokens / shadowFiToken.totalSupply()) * 10000;
 
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
