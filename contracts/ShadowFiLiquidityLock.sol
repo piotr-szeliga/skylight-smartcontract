@@ -515,6 +515,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     }
 
     function buyAndBurnExcessAmount(uint256 percent) public onlyOwner {
+        require(percent >= 1 && percent <= 9200, "Invalid parameter is provided");
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
         uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
@@ -523,7 +524,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
         require(liquidPercent - percent >= 800, "The amount compared to liquidi tokens should be less than 8% of the totalSupply.");
 
-        uint256 removeAmount = ((liquidPercent - percent) * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
+        uint256 removeAmount = (percent * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
