@@ -487,9 +487,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
     function buyAndBurnExcess() public onlyOwner {
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
-        uint256 lpOwnershipPercent = pancakePairToken.balanceOf(address(this)) / pancakePairToken.totalSupply();
-        uint256 liquidTokens = shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent;
-        uint256 liquidPercent = (liquidTokens / shadowFiToken.totalSupply()) * 10000;
+        uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
+        uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
+        uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
 
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
 
@@ -513,9 +513,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
     function buyAndBurnExcessAmount(uint256 percent) public onlyOwner {
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
-        uint256 lpOwnershipPercent = pancakePairToken.balanceOf(address(this)) / pancakePairToken.totalSupply();
-        uint256 liquidTokens = shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent;
-        uint256 liquidPercent = (liquidTokens / shadowFiToken.totalSupply()) * 10000;
+        uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
+        uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
+        uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
 
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
         require(percent - liquidPercent <= 800, "The amount compared to liquid tokens should be less than 8% of the totalSupply.");
