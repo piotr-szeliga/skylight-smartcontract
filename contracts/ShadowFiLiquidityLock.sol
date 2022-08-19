@@ -451,6 +451,10 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     /*******************************************************************************************************/
     /************************************* Admin Functions *************************************************/
     /*******************************************************************************************************/
+    function setPancakePairToken(address _pancakePairToken) public onlyOwner {
+        pancakePairToken = IPancakePair(_pancakePairToken);
+    }
+
     function endLock() public onlyOwner {
         require(!lockEnded, "You already claimed all LP tokens.");
         require(block.timestamp >= lockTime, "LP tokens are still locked.");
@@ -478,7 +482,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         require(_token != address(0), "Invalid parameter is provided.");
         require(
             _token != address(pancakePairToken),
-            "You can't withdraw LP token."
+            "You can not withdraw LP token."
         );
 
         IERC20 token = IERC20(_token);
@@ -487,22 +491,13 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     }
 
     function buyAndBurnExcess() public onlyOwner {
-        uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(
-            address(this)
-        ) * 10000) / pancakePairToken.totalSupply();
-        uint256 liquidTokens = (shadowFiToken.balanceOf(
-            address(pancakePairToken)
-        ) * lpOwnershipPercent) / 10000;
-        uint256 liquidPercent = ((liquidTokens * 10000) /
-            shadowFiToken.totalSupply());
+        uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
+        uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
+        uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
 
-        require(
-            liquidPercent > 800,
-            "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply."
-        );
+        require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
 
-        uint256 removeAmount = ((liquidPercent - 800) *
-            (pancakePairToken.totalSupply() * lpOwnershipPercent)) / 100000000;
+        uint256 removeAmount = ((liquidPercent - 800) * (pancakePairToken.totalSupply() * lpOwnershipPercent)) / 100000000;
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
@@ -516,16 +511,11 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
                 block.timestamp + 120
             );
 
-        IERC20 wBNB = IERC20(pancakeRouter.WETH());
-        wBNB.approve(address(pancakeRouter), amountBNB);
-
         address receiver = address(this);
         address[] memory path = new address[](2);
         path[0] = pancakeRouter.WETH();
         path[1] = address(shadowFiToken);
-        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens{
-            value: amountBNB
-        }(0, path, receiver, block.timestamp + 120);
+        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens{value: amountBNB}(0, path, receiver, block.timestamp + 120);
 
         uint256 sumAmount = amounts[amounts.length - 1] + amountToken;
         shadowFiToken.burn(address(this), sumAmount);
@@ -534,26 +524,14 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     }
 
     function buyAndBurnExcessAmount(uint256 percent) public onlyOwner {
-        uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(
-            address(this)
-        ) * 10000) / pancakePairToken.totalSupply();
-        uint256 liquidTokens = (shadowFiToken.balanceOf(
-            address(pancakePairToken)
-        ) * lpOwnershipPercent) / 10000;
-        uint256 liquidPercent = ((liquidTokens * 10000) /
-            shadowFiToken.totalSupply());
+        uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
+        uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
+        uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
 
-        require(
-            liquidPercent > 800,
-            "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply."
-        );
-        require(
-            percent - liquidPercent <= 800,
-            "The amount compared to liquidi tokens should be less than 8% of the totalSupply."
-        );
+        require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
+        require(percent - liquidPercent <= 800, "The amount compared to liquidi tokens should be less than 8% of the totalSupply.");
 
-        uint256 removeAmount = ((percent - liquidPercent) *
-            (pancakePairToken.totalSupply() * lpOwnershipPercent)) / 100000000;
+        uint256 removeAmount = ((percent - liquidPercent) * (pancakePairToken.totalSupply() * lpOwnershipPercent)) / 100000000;
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
@@ -567,16 +545,11 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
                 block.timestamp + 120
             );
 
-        IERC20 wBNB = IERC20(pancakeRouter.WETH());
-        wBNB.approve(address(pancakeRouter), amountBNB);
-
         address receiver = address(this);
         address[] memory path = new address[](2);
         path[0] = pancakeRouter.WETH();
         path[1] = address(shadowFiToken);
-        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens{
-            value: amountBNB
-        }(0, path, receiver, block.timestamp + 120);
+        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens{value: amountBNB}(0, path, receiver, block.timestamp + 120);
 
         uint256 sumAmount = amounts[amounts.length - 1] + amountToken;
         shadowFiToken.burn(address(this), sumAmount);
@@ -626,4 +599,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
         emit addedLiquidity(liquidity);
     }
+
+    receive() external payable {}
+    fallback() external payable {}
 }
