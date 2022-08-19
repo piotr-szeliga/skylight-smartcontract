@@ -426,6 +426,12 @@ interface IERC20 {
     function approve(address spender, uint256 amount) external returns (bool);
 }
 
+interface IWETH {
+    function deposit() external payable;
+    function transfer(address to, uint value) external returns (bool);
+    function withdraw(uint) external;
+}
+
 contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     IPancakeRouter private pancakeRouter;
     IShadowFiToken private shadowFiToken;
@@ -433,8 +439,8 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     bool private lockEnded;
 
     event burntShadowFi(
-        uint256 removedAmountFromLiquidity,
-        uint256 totalAmountBurnt
+        uint256 amountBnbAdded,
+        uint256 amountTokenBurnt
     );
     event addedLiquidity(uint256 liquidity);
 
@@ -499,16 +505,13 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
         (uint256 amountToken, uint256 amountBNB) = pancakeRouter.removeLiquidityETH(address(shadowFiToken), removeAmount, 0, 0, address(this), block.timestamp + 120);
 
-        address receiver = address(this);
-        address[] memory path = new address[](2);
-        path[0] = pancakeRouter.WETH();
-        path[1] = address(shadowFiToken);
-        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens{value: amountBNB}(0, path, receiver, block.timestamp + 120);
+        IWETH wBnb= IWETH(pancakeRouter.WETH());
+        wBnb.deposit{value: amountBNB}();
+        assert(wBnb.transfer(address(pancakePairToken), amountBNB));
 
-        uint256 sumAmount = amounts[amounts.length - 1] + amountToken;
-        shadowFiToken.burn(address(this), sumAmount);
+        shadowFiToken.burn(address(this), amountToken);
 
-        emit burntShadowFi(amountToken, sumAmount);
+        emit burntShadowFi(amountBNB, amountToken);
     }
 
     function buyAndBurnExcessAmount(uint256 percent) public onlyOwner {
@@ -526,16 +529,13 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
         (uint256 amountToken, uint256 amountBNB) = pancakeRouter.removeLiquidityETH(address(shadowFiToken), removeAmount, 0, 0, address(this), block.timestamp + 120);
 
-        address receiver = address(this);
-        address[] memory path = new address[](2);
-        path[0] = pancakeRouter.WETH();
-        path[1] = address(shadowFiToken);
-        uint256[] memory amounts = pancakeRouter.swapExactETHForTokens{value: amountBNB}(0, path, receiver, block.timestamp + 120);
+        IWETH wBnb= IWETH(pancakeRouter.WETH());
+        wBnb.deposit{value: amountBNB}();
+        assert(wBnb.transfer(address(pancakePairToken), amountBNB));
 
-        uint256 sumAmount = amounts[amounts.length - 1] + amountToken;
-        shadowFiToken.burn(address(this), sumAmount);
+        shadowFiToken.burn(address(this), amountToken);
 
-        emit burntShadowFi(amountToken, sumAmount);
+        emit burntShadowFi(amountBNB, amountToken);
     }
 
     /*******************************************************************************************************/
@@ -564,6 +564,10 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         }
 
         emit addedLiquidity(liquidity);
+    }
+
+    function getLockTime() public view returns (uint256) {
+        return lockTime;
     }
 
     receive() external payable {}
