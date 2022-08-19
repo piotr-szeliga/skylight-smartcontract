@@ -418,6 +418,8 @@ interface IERC20 {
     function transfer(address to, uint256 amount) external returns (bool);
 
     function balanceOf(address account) external view returns (uint256);
+
+    function approve(address spender, uint256 amount) external returns (bool);
 }
 
 contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
@@ -501,6 +503,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
         uint256 removeAmount = ((liquidPercent - 800) *
             (pancakePairToken.totalSupply() * lpOwnershipPercent)) / 100000000;
+
+        pancakePairToken.approve(address(pancakeRouter), removeAmount);
+
         (uint256 amountToken, uint256 amountBNB) = pancakeRouter
             .removeLiquidityETH(
                 address(shadowFiToken),
@@ -511,6 +516,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
                 block.timestamp + 120
             );
 
+        IERC20 wBNB = IERC20(pancakeRouter.WETH());
+        wBNB.approve(address(pancakeRouter), amountBNB);
+
         address receiver = address(this);
         address[] memory path = new address[](2);
         path[0] = pancakeRouter.WETH();
@@ -519,11 +527,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
             value: amountBNB
         }(0, path, receiver, block.timestamp + 120);
 
-        uint256 sumAmount = 0;
-        for (uint256 i = 0; i < amounts.length; i++) {
-            sumAmount += amounts[i];
-        }
-        sumAmount += amountToken;
+        uint256 sumAmount = amounts[amounts.length - 1] + amountToken;
         shadowFiToken.burn(address(this), sumAmount);
 
         emit burntShadowFi(amountToken, sumAmount);
@@ -550,6 +554,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
         uint256 removeAmount = ((percent - liquidPercent) *
             (pancakePairToken.totalSupply() * lpOwnershipPercent)) / 100000000;
+
+        pancakePairToken.approve(address(pancakeRouter), removeAmount);
+
         (uint256 amountToken, uint256 amountBNB) = pancakeRouter
             .removeLiquidityETH(
                 address(shadowFiToken),
@@ -560,6 +567,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
                 block.timestamp + 120
             );
 
+        IERC20 wBNB = IERC20(pancakeRouter.WETH());
+        wBNB.approve(address(pancakeRouter), amountBNB);
+
         address receiver = address(this);
         address[] memory path = new address[](2);
         path[0] = pancakeRouter.WETH();
@@ -568,11 +578,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
             value: amountBNB
         }(0, path, receiver, block.timestamp + 120);
 
-        uint256 sumAmount = 0;
-        for (uint256 i = 0; i < amounts.length; i++) {
-            sumAmount += amounts[i];
-        }
-        sumAmount += amountToken;
+        uint256 sumAmount = amounts[amounts.length - 1] + amountToken;
         shadowFiToken.burn(address(this), sumAmount);
 
         emit burntShadowFi(amountToken, sumAmount);
