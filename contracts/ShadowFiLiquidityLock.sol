@@ -270,6 +270,10 @@ interface IPancakeRouter {
     ) external;
 }
 
+interface IPancakeFactory {
+    function getPair(address tokenA, address tokenB) external view returns (address pair);
+}
+
 interface IPancakePair {
     event Approval(
         address indexed owner,
@@ -423,7 +427,6 @@ interface IERC20 {
 }
 
 contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
-    IPancakePair private pancakePairToken;
     IPancakeRouter private pancakeRouter;
     IShadowFiToken private shadowFiToken;
     uint256 private lockTime;
@@ -436,12 +439,10 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     event addedLiquidity(uint256 liquidity);
 
     constructor(
-        address _pancakePairToken,
         address _pancakeRouter,
         address _shadowFiToken,
         uint256 _lockTime
     ) {
-        pancakePairToken = IPancakePair(_pancakePairToken);
         pancakeRouter = IPancakeRouter(_pancakeRouter);
         shadowFiToken = IShadowFiToken(_shadowFiToken);
         lockTime = _lockTime;
@@ -451,18 +452,13 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     /*******************************************************************************************************/
     /************************************* Admin Functions *************************************************/
     /*******************************************************************************************************/
-    function setPancakePairToken(address _pancakePairToken) public onlyOwner {
-        pancakePairToken = IPancakePair(_pancakePairToken);
-    }
-
     function endLock() public onlyOwner {
         require(!lockEnded, "You already claimed all LP tokens.");
         require(block.timestamp >= lockTime, "LP tokens are still locked.");
 
-        pancakePairToken.transfer(
-            owner(),
-            pancakePairToken.balanceOf(address(this))
-        );
+        IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
+        pancakePairToken.transfer(owner(), pancakePairToken.balanceOf(address(this)));
+
         lockEnded = true;
     }
 
@@ -480,10 +476,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
     function withdrawTokens(address _token) public onlyOwner {
         require(_token != address(0), "Invalid parameter is provided.");
-        require(
-            _token != address(pancakePairToken),
-            "You can not withdraw LP token."
-        );
+
+        IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
+        require(_token != address(pancakePairToken), "You can not withdraw LP token.");
 
         IERC20 token = IERC20(_token);
         uint256 amount = token.balanceOf(address(this));
@@ -491,6 +486,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     }
 
     function buyAndBurnExcess() public onlyOwner {
+        IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
         uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
         uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
@@ -501,15 +497,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
-        (uint256 amountToken, uint256 amountBNB) = pancakeRouter
-            .removeLiquidityETH(
-                address(shadowFiToken),
-                removeAmount,
-                0,
-                0,
-                address(this),
-                block.timestamp + 120
-            );
+        (uint256 amountToken, uint256 amountBNB) = pancakeRouter.removeLiquidityETH(address(shadowFiToken), removeAmount, 0, 0, address(this), block.timestamp + 120);
 
         address receiver = address(this);
         address[] memory path = new address[](2);
@@ -524,6 +512,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     }
 
     function buyAndBurnExcessAmount(uint256 percent) public onlyOwner {
+        IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
         uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
         uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
@@ -535,15 +524,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
-        (uint256 amountToken, uint256 amountBNB) = pancakeRouter
-            .removeLiquidityETH(
-                address(shadowFiToken),
-                removeAmount,
-                0,
-                0,
-                address(this),
-                block.timestamp + 120
-            );
+        (uint256 amountToken, uint256 amountBNB) = pancakeRouter.removeLiquidityETH(address(shadowFiToken), removeAmount, 0, 0, address(this), block.timestamp + 120);
 
         address receiver = address(this);
         address[] memory path = new address[](2);
@@ -564,26 +545,11 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         require(_amountToken > 0, "Invalid parameter is provided.");
         require(msg.value > 0, "You should fund this contract with BNB.");
 
-        shadowFiToken.transferFrom(
-            address(msg.sender),
-            address(this),
-            _amountToken
-        );
+        shadowFiToken.transferFrom(address(msg.sender), address(this), _amountToken);
 
         shadowFiToken.approve(address(pancakeRouter), _amountToken);
 
-        (
-            uint256 amountToken,
-            uint256 amountBNB,
-            uint256 liquidity
-        ) = pancakeRouter.addLiquidityETH{value: msg.value}(
-                address(shadowFiToken),
-                _amountToken,
-                0,
-                0,
-                address(this),
-                block.timestamp + 120
-            );
+        (uint256 amountToken, uint256 amountBNB, uint256 liquidity) = pancakeRouter.addLiquidityETH{value: msg.value}(address(shadowFiToken), _amountToken, 0, 0, address(this), block.timestamp + 120);
 
         // Return excess token and BNB
         uint256 excessAmountToken = _amountToken - amountToken;

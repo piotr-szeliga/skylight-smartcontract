@@ -7,7 +7,6 @@ async function main() {
     "ShadowFiLiquidityLock"
   );
   const contract = await ShadowFiLiquidityLock.deploy(
-    "0x6d3288A9AB3D80533444b75971B1542F2a58117E",
     "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
     "0x6ac5BE595D791e6a547Ae8753000bC3b2731E5cA",
     1661147602
