@@ -493,7 +493,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
 
-        uint256 removeAmount = (pancakePairToken.balanceOf(address(this) * lpOwnershipPercent)) * (liquidPercent - 800) / 10000;
+        uint256 removeAmount = (pancakePairToken.balanceOf(address(this)) * lpOwnershipPercent) * (liquidPercent - 800) / 10000;
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
