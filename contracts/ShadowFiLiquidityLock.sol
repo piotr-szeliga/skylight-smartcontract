@@ -543,6 +543,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     /************************************* Public Functions ************************************************/
     /*******************************************************************************************************/
     function addLiquidity(uint256 _amountToken) external payable {
+        require(!lockEnded, "Contract is locked.");
         require(_amountToken > 0, "Invalid parameter is provided.");
         require(msg.value > 0, "You should fund this contract with BNB.");
 
