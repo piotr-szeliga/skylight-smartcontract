@@ -443,11 +443,12 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
 
     constructor(
         address _pancakeRouter,
-        address _shadowFiToken
+        address _shadowFiToken,
+        uint256 _lockTime
     ) {
         pancakeRouter = IPancakeRouter(_pancakeRouter);
         shadowFiToken = IShadowFiToken(_shadowFiToken);
-        lockTime = block.timestamp + 90 * 24 * 3600;
+        lockTime = _lockTime;
         lockEnded = false;
     }
 
