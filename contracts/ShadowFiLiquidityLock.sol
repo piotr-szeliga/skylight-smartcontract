@@ -438,20 +438,16 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     uint256 private lockTime;
     bool private lockEnded;
 
-    event burntShadowFi(
-        uint256 amountBnbAdded,
-        uint256 amountTokenBurnt
-    );
+    event burntShadowFi(uint256 amountBnbAdded, uint256 amountTokenBurnt);
     event addedLiquidity(uint256 liquidity);
 
     constructor(
         address _pancakeRouter,
-        address _shadowFiToken,
-        uint256 _lockTime
+        address _shadowFiToken
     ) {
         pancakeRouter = IPancakeRouter(_pancakeRouter);
         shadowFiToken = IShadowFiToken(_shadowFiToken);
-        lockTime = _lockTime;
+        lockTime = block.timestamp + 90 * 24 * 3600;
         lockEnded = false;
     }
 
@@ -515,7 +511,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     }
 
     function buyAndBurnExcessAmount(uint256 percent) public onlyOwner {
-        require(percent >= 1 && percent <= 9200, "Invalid parameter is provided");
+        require(percent >= 10 && percent <= 9200, "Invalid parameter is provided");
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
         uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
