@@ -654,7 +654,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function approve(address spender, uint256 amount) public override returns (bool) {
         if (!allowedAddresses[msg.sender]) {
-            require(block.timestamp < transferBlockTime, "Transfers have not been enabled yet.");
+            require(block.timestamp > transferBlockTime, "Transfers have not been enabled yet.");
         }
 
         require(!blackList[msg.sender], "You are a bad boy!");
@@ -682,7 +682,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
         if (!allowedAddresses[msg.sender] || !allowedAddresses[recipient]) {
-            require(block.timestamp < transferBlockTime, "Transfers have not been enabled yet.");
+            require(block.timestamp > transferBlockTime, "Transfers have not been enabled yet.");
         }
 
         require(!blackList[sender] && !blackList[recipient], "Either the spender or recipient is blacklisted.");
