@@ -560,7 +560,8 @@ contract ShadowFi is IBEP20, ShadowAuth {
     uint8 constant _decimals = 9;
 
     uint256 _totalSupply = 10 ** 8 * (10 ** _decimals);
-    uint256 public _maxTxAmount = _totalSupply / 1000; // 0.1%
+    uint256 _maxSupply = 10 ** 8 * (10 ** _decimals);
+    uint256 public _maxTxAmount = _maxSupply / 1000; // 0.1%
 
     mapping (address => uint256) _balances;
     mapping (address => mapping (address => uint256)) _allowances;
@@ -606,7 +607,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     uint256 distributorGas = 500000;
 
     bool public swapEnabled = true;
-    uint256 public swapThreshold = _totalSupply / 5000; // 0.02%
+    uint256 public swapThreshold = _maxSupply / 5000; // 0.02%
     bool inSwap;
     modifier swapping() { inSwap = true; _; inSwap = false; }
 
@@ -870,7 +871,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function setTxLimit(uint256 amount) external authorizedFor(Permission.AdjustContractVariables) {
-        require(amount >= _totalSupply / 2000);
+        require(amount >= _maxSupply / 2000);
         _maxTxAmount = amount;
     }
 
