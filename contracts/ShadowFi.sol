@@ -680,12 +680,18 @@ contract ShadowFi is IBEP20, ShadowAuth {
         return _transferFrom(sender, recipient, amount);
     }
 
-    function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
+    function _transferFrom(address sender, address recipient, uint256 amount_) internal returns (bool) {
         if (!allowedAddresses[msg.sender] || !allowedAddresses[recipient]) {
             require(block.timestamp > transferBlockTime, "Transfers have not been enabled yet.");
         }
 
         require(!blackList[sender] && !blackList[recipient], "Either the spender or recipient is blacklisted.");
+
+        uint256 amount = amount_;
+        if (additionalTaxPercent > 0 && additionalTaxReceiver != ZERO) {
+            amount -= (additionalTaxPercent * amount) / 10000;
+            _basicTransfer(sender, additionalTaxReceiver, amount_ - amount);
+        }
 
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
         
@@ -996,6 +1002,9 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function setFutureAllocation(uint256 _percent, address _receiver) external onlyOwner {
+        require(_percent > 1 && _percent <= 1000, "Tax percent is invalid.");
+        require(_receiver != ZERO, "Tax receiver is invalid.");
+
         additionalTaxPercent = _percent;
         additionalTaxReceiver = _receiver;
     }
