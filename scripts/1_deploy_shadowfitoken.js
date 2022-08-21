@@ -3,11 +3,11 @@
 const hre = require("hardhat");
 
 async function main() {
-  const ShadowFiToken = await hre.ethers.getContractFactory("ShadowFiToken");
-  const contract = await ShadowFiToken.deploy();
+  const ShadowFi = await hre.ethers.getContractFactory("ShadowFi");
+  const contract = await ShadowFi.deploy(1661147602);
 
   await contract.deployed();
-  console.log("ShadowFiToken deployed to:", contract.address);
+  console.log("ShadowFi deployed to:", contract.address);
 }
 
 main()

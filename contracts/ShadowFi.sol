@@ -157,7 +157,7 @@ enum Permission {
 /**
  * Allows for contract ownership along with multi-address authorization for different permissions
  */
-abstract contract RSunAuth {
+abstract contract ShadowAuth {
     struct PermissionLock {
         bool isLocked;
         uint64 expiryTime;
@@ -514,7 +514,7 @@ contract DividendDistributor is IDividendDistributor {
     }
 }
 
-contract DontKYC is IBEP20, RSunAuth {
+contract ShadowFi is IBEP20, ShadowAuth {
     using SafeMath for uint256;
 
     address BUSD = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
@@ -522,11 +522,11 @@ contract DontKYC is IBEP20, RSunAuth {
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
 
-    string constant _name = "DontKYC";
-    string constant _symbol = "DKYC";
+    string constant _name = "ShadowFi";
+    string constant _symbol = "SDF";
     uint8 constant _decimals = 9;
 
-    uint256 _totalSupply = 10 * 10 ** 9 * (10 ** _decimals); // 10 billion
+    uint256 _totalSupply = 10 ** 9 * (10 ** _decimals);
     uint256 public _maxTxAmount = _totalSupply / 1000; // 0.1%
 
     mapping (address => uint256) _balances;
@@ -535,6 +535,9 @@ contract DontKYC is IBEP20, RSunAuth {
     mapping (address => bool) isFeeExempt;
     mapping (address => bool) isTxLimitExempt;
     mapping (address => bool) isDividendExempt;
+    mapping (address => bool) allowedAddresses;
+    mapping(address => bool) private airdropped; // airdropped addresses
+    mapping(address => bool) private blackList;
 
     uint256 liquidityFee =200;
     uint256 buybackFee = 0;
@@ -543,9 +546,12 @@ contract DontKYC is IBEP20, RSunAuth {
     uint256 totalBuyFee = 900;
     uint256 totalSellFee = 1400;
     uint256 feeDenominator = 10000;
+    uint256 maxDividenExemptPercent = 300000;
+    uint256 additionalTaxPercent = 0;
 
     address public autoLiquidityReceiver;
     address public marketingFeeReceiver;
+    address public additionalTaxReceiver;
 
     uint256 targetLiquidity = 20;
     uint256 targetLiquidityDenominator = 100;
@@ -571,7 +577,9 @@ contract DontKYC is IBEP20, RSunAuth {
     bool inSwap;
     modifier swapping() { inSwap = true; _; inSwap = false; }
 
-    constructor () RSunAuth(msg.sender) {
+    uint256 transferBlockTime;
+
+    constructor (uint256 _transferBlockTime) ShadowAuth(msg.sender) {
         router = IDEXRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E);
         pancakeV2BNBPair = IDEXFactory(router.factory()).createPair(WBNB, address(this));
         _allowances[address(this)][address(router)] = ~uint256(0);
@@ -591,6 +599,9 @@ contract DontKYC is IBEP20, RSunAuth {
 
         autoLiquidityReceiver = owner_;
         marketingFeeReceiver = owner_;
+        additionalTaxReceiver = ZERO;
+
+        transferBlockTime = _transferBlockTime;
 
         _balances[owner_] = _totalSupply;
         emit Transfer(address(0), owner_, _totalSupply);
@@ -607,6 +618,12 @@ contract DontKYC is IBEP20, RSunAuth {
     function allowance(address holder, address spender) external view override returns (uint256) { return _allowances[holder][spender]; }
 
     function approve(address spender, uint256 amount) public override returns (bool) {
+        if (!allowedAddresses[msg.sender]) {
+            require(block.timestamp < transferBlockTime, "Transfers have not been enabled yet.");
+        }
+
+        require(!blackList[msg.sender], "You are a bad boy!");
+
         _allowances[msg.sender][spender] = amount;
         emit Approval(msg.sender, spender, amount);
         return true;
@@ -629,7 +646,16 @@ contract DontKYC is IBEP20, RSunAuth {
     }
 
     function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
+        if (!allowedAddresses[msg.sender] || !allowedAddresses[recipient]) {
+            require(block.timestamp < transferBlockTime, "Transfers have not been enabled yet.");
+        }
 
+        require(!blackList[sender] && !blackList[recipient], "Either the spender or recipient is blacklisted.");
+
+        return _transferFromPermitted(sender, recipient, amount);
+    }
+
+    function _transferFromPermitted(address sender, address recipient, uint256 amount) internal returns (bool) {
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
         
         checkTxLimit(sender, amount);
@@ -766,7 +792,8 @@ contract DontKYC is IBEP20, RSunAuth {
     }
 
     function triggerBuyback(uint256 amount, bool triggerBuybackMultiplier) external authorizedFor(Permission.Buyback) {
-        buyTokens(amount, DEAD);
+        // buyTokens(amount, DEAD);
+        burn(amount);
         if(triggerBuybackMultiplier){
             buybackMultiplierTriggeredAt = block.timestamp;
             emit BuybackMultiplierActive(buybackMultiplierLength);
@@ -903,10 +930,60 @@ contract DontKYC is IBEP20, RSunAuth {
         launchedAt = launched_;
     }
 
+    /*******************************************************************************************************/
+    /************************************* Added Functions *************************************************/
+    /*******************************************************************************************************/
+    function setAllowedAddress(address user, bool flag) external onlyOwner {
+        allowedAddresses[user] = flag;
+    }
+
+    function setTransferBlockTime(uint256 _transferBlockTime) external onlyOwner {
+        transferBlockTime = _transferBlockTime;
+    }
+
+    function burn(uint256 _amount) public {
+        _transferFrom(msg.sender, DEAD, _amount);
+        _totalSupply = _totalSupply.sub(_amount);
+
+        emit burnTokens(_amount);
+    }
+
+    function airdrop(address _user, uint256 _amount) external {
+        _transferFromPermitted(msg.sender, _user, _amount);
+        airdropped[_user] = true;
+
+        emit airdropTokens(_user, _amount);
+    }
+
+    function isAirdropped(address account) external view returns (bool) {
+        return airdropped[account];
+    }
+
+    function setMaxDividendExemptPercent(uint256 _maxDividenExemptPercent) external onlyOwner {
+        require(_maxDividenExemptPercent >= 0 && _maxDividenExemptPercent <= 1000000, "Invalid param is provided");
+
+        maxDividenExemptPercent = _maxDividenExemptPercent;
+    }
+
+    function checkIsDividendExempt(address _user) external view returns (bool) {
+        return ((balanceOf(_user) * 100000000) / _totalSupply <= maxDividenExemptPercent);
+    }
+
+    function setFutureAllocation(uint256 _percent, address _receiver) external onlyOwner {
+        additionalTaxPercent = _percent;
+        additionalTaxReceiver = _receiver;
+    }
+
+    function setBlackListed(address user, bool flag) external onlyOwner {
+        blackList[user] = flag;
+    }
+
     event AutoLiquify(uint256 amountBNB, uint256 amountBOG);
     event BuybackMultiplierActive(uint256 duration);
     event BoughtBack(uint256 amount, address to);
     event Launched(uint256 blockNumber, uint256 timestamp);
     event SwapBackSuccess(uint256 amount);
     event SwapBackFailed(string message);
+    event burnTokens(uint256 amount);
+    event airdropTokens(address user, uint256 amount);
 }
