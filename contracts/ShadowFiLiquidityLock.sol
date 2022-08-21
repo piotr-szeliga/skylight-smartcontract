@@ -573,7 +573,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
 
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
-        require(liquidPercent - percent >= 800, "The amount compared to liquidi tokens should be less than 8% of the totalSupply.");
+        require(liquidPercent - percent >= 800, "The amount compared to liquidity tokens should be less than 8% of the totalSupply.");
 
         removeAmount = (percent * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
     }
