@@ -588,6 +588,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
         distributor = new DividendDistributor(address(router));
 
         address owner_ = msg.sender;
+        allowedAddresses[owner_] = true;
 
         isFeeExempt[owner_] = true;
         isTxLimitExempt[owner_] = true;
