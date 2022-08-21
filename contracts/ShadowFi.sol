@@ -968,10 +968,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
         allowedAddresses[user] = flag;
     }
 
-    function setTransferBlockTime(uint256 _transferBlockTime) external onlyOwner {
-        transferBlockTime = _transferBlockTime;
-    }
-
     function burn(uint256 _amount) public {
         _transferFrom(msg.sender, DEAD, _amount);
 
