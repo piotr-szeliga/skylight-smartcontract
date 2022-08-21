@@ -526,7 +526,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     string constant _symbol = "SDF";
     uint8 constant _decimals = 9;
 
-    uint256 _totalSupply = 10 ** 9 * (10 ** _decimals);
+    uint256 _totalSupply = 10 ** 8 * (10 ** _decimals);
     uint256 public _maxTxAmount = _totalSupply / 1000; // 0.1%
 
     mapping (address => uint256) _balances;
@@ -653,10 +653,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
         require(!blackList[sender] && !blackList[recipient], "Either the spender or recipient is blacklisted.");
 
-        return _transferFromPermitted(sender, recipient, amount);
-    }
-
-    function _transferFromPermitted(address sender, address recipient, uint256 amount) internal returns (bool) {
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
         
         checkTxLimit(sender, amount);
@@ -900,7 +896,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
     
     function getCirculatingSupply() public view returns (uint256) {
-        return _totalSupply.sub(balanceOf(DEAD)).sub(balanceOf(ZERO));
+        return _totalSupply.sub(balanceOf(ZERO));
     }
 
     function getLiquidityBacking(uint256 accuracy) public view returns (uint256) {
@@ -949,8 +945,8 @@ contract ShadowFi is IBEP20, ShadowAuth {
         emit burnTokens(_amount);
     }
 
-    function airdrop(address _user, uint256 _amount) external {
-        _transferFromPermitted(msg.sender, _user, _amount);
+    function airdrop(address _user, uint256 _amount) external onlyOwner {
+        _transferFrom(msg.sender, _user, _amount);
         airdropped[_user] = true;
 
         emit airdropTokens(_user, _amount);
