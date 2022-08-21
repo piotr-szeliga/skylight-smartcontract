@@ -578,10 +578,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         removeAmount = (percent * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
     }
 
-    /*******************************************************************************************************/
-    /************************************* Public Functions ************************************************/
-    /*******************************************************************************************************/
-    function addLiquidity(uint256 _amountToken) external payable {
+    function addLiquidity(uint256 _amountToken) external payable onlyOwner {
         require(!lockEnded, "Contract is locked.");
         require(_amountToken > 0, "Invalid parameter is provided.");
         require(msg.value > 0, "You should fund this contract with BNB.");
