@@ -643,7 +643,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     receive() external payable { }
 
-    function totalSupply() external view override returns (uint256) { return _totalSupply; }
+    function totalSupply() external view override returns (uint256) { return _totalSupply.sub(balanceOf(DEAD)).sub(balanceOf(ZERO)); }
     function decimals() external pure override returns (uint8) { return _decimals; }
     function symbol() external pure override returns (string memory) { return _symbol; }
     function name() external pure override returns (string memory) { return _name; }
@@ -929,7 +929,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
     
     function getCirculatingSupply() public view returns (uint256) {
-        return _totalSupply.sub(balanceOf(ZERO));
+        return _totalSupply.sub(balanceOf(DEAD)).sub(balanceOf(ZERO));
     }
 
     function getLiquidityBacking(uint256 accuracy) public view returns (uint256) {
@@ -973,7 +973,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function burn(uint256 _amount) public {
         _transferFrom(msg.sender, DEAD, _amount);
-        _totalSupply = _totalSupply.sub(_amount);
 
         emit burnTokens(_amount);
     }
