@@ -488,7 +488,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         token.transfer(address(msg.sender), amount);
     }
 
-    function buyAndBurnExcess() public onlyOwner {
+    function shadowStrike() public onlyOwner {
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
         uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
@@ -511,7 +511,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         emit burntShadowFi(amountBNB, amountToken);
     }
 
-    function buyAndBurnExcessAmount(uint256 percent) public onlyOwner {
+    function shadowBurst(uint256 percent) public onlyOwner {
         require(percent >= 1 && percent <= 9200, "Invalid parameter is provided");
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
@@ -519,9 +519,9 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
 
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
-        require(liquidPercent - percent >= 800, "The amount compared to liquidi tokens should be less than 8% of the totalSupply.");
+        require(liquidPercent - percent >= 800, "The amount compared to liquidity tokens should be less than 8% of the totalSupply.");
 
-        uint256 removeAmount = (percent * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000 * 10);
+        uint256 removeAmount = (percent * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
@@ -573,15 +573,12 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         uint256 liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
 
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
-        require(liquidPercent - percent >= 800, "The amount compared to liquidi tokens should be less than 8% of the totalSupply.");
+        require(liquidPercent - percent >= 800, "The amount compared to liquidity tokens should be less than 8% of the totalSupply.");
 
-        removeAmount = (percent * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000 * 10);
+        removeAmount = (percent * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
     }
 
-    /*******************************************************************************************************/
-    /************************************* Public Functions ************************************************/
-    /*******************************************************************************************************/
-    function addLiquidity(uint256 _amountToken) external payable {
+    function addLiquidity(uint256 _amountToken) external payable onlyOwner {
         require(!lockEnded, "Contract is locked.");
         require(_amountToken > 0, "Invalid parameter is provided.");
         require(msg.value > 0, "You should fund this contract with BNB.");
