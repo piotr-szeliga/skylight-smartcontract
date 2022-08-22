@@ -744,7 +744,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
         return selling ? totalSellFee : totalBuyFee;
     }
 
-    function getFutureFee() public view returns (uint256) {
+    function getAdditionalTaxFee() public view returns (uint256) {
         return additionalTaxPercent;
     }
 
