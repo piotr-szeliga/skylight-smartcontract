@@ -688,9 +688,12 @@ contract ShadowFi is IBEP20, ShadowAuth {
         require(!blackList[sender] && !blackList[recipient], "Either the spender or recipient is blacklisted.");
 
         uint256 amount = amount_;
-        if (additionalTaxPercent > 0 && additionalTaxReceiver != ZERO) {
-            amount -= (additionalTaxPercent * amount) / 10000;
-            _basicTransfer(sender, additionalTaxReceiver, amount_ - amount);
+
+        if (shouldTakeFee(sender, recipient)) {
+            if (additionalTaxPercent > 0 && additionalTaxReceiver != ZERO) {
+                amount -= (additionalTaxPercent * amount) / 10000;
+                _basicTransfer(sender, additionalTaxReceiver, amount_ - amount);
+            }
         }
 
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
@@ -881,10 +884,14 @@ contract ShadowFi is IBEP20, ShadowAuth {
         _maxTxAmount = amount;
     }
 
-    function setIsDividendExempt(address holder) external authorizedFor(Permission.ExcludeInclude) {
+    function setIsDividendExempt(address holder, bool exempt_) external authorizedFor(Permission.ExcludeInclude) {
         require(holder != address(this) && holder != pancakeV2BNBPair);
 
-        bool exempt = ((balanceOf(holder) * 100000000) / _totalSupply <= maxDividenExemptPercent);
+        bool exempt = exempt_;
+        if (checkIsDividenExempt(holder)) {
+            exempt = true;
+        }
+        
         isDividendExempt[holder] = exempt;
 
         if(exempt) {
