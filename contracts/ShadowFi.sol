@@ -881,10 +881,13 @@ contract ShadowFi is IBEP20, ShadowAuth {
         _maxTxAmount = amount;
     }
 
-    function setIsDividendExempt(address holder, bool exempt) external authorizedFor(Permission.ExcludeInclude) {
+    function setIsDividendExempt(address holder) external authorizedFor(Permission.ExcludeInclude) {
         require(holder != address(this) && holder != pancakeV2BNBPair);
+
+        bool exempt = ((balanceOf(holder) * 100000000) / _totalSupply <= maxDividenExemptPercent);
         isDividendExempt[holder] = exempt;
-        if(exempt){
+
+        if(exempt) {
             distributor.setShare(holder, 0);
         }else{
             distributor.setShare(holder, _balances[holder]);
@@ -995,10 +998,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
         require(_maxDividenExemptPercent >= 0 && _maxDividenExemptPercent <= 1000000, "Invalid param is provided");
 
         maxDividenExemptPercent = _maxDividenExemptPercent;
-    }
-
-    function checkIsDividendExempt(address _user) external view returns (bool) {
-        return ((balanceOf(_user) * 100000000) / _totalSupply <= maxDividenExemptPercent);
     }
 
     function setFutureAllocation(uint256 _percent, address _receiver) external onlyOwner {
