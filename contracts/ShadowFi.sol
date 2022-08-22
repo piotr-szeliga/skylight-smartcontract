@@ -46,17 +46,11 @@
                               ..                                                          
                                                                                           
                                                        
-
 Don't Know Your Customer (DKYC) is the first anonymous cryptocurrency credit card built for Decentralized Finance (DeFi). 
-
 Seamlessly connecting Smart Chain investing with real-world spending. 
-
 | Website: https://dontkyc.com
-
 | Telegram: https://t.me/DontKYC
-
 | Twitter: https://twitter.com/DontKYC
-
 */
 
 //SPDX-License-Identifier: MIT
@@ -392,8 +386,8 @@ contract DividendDistributor is IDividendDistributor {
         uint256 totalRealised;
     }
 
-    IBEP20 BUSD = IBEP20(0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee);
-    address WBNB = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
+    IBEP20 BUSD = IBEP20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+    address WBNB = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
     IDEXRouter router;
 
     address[] shareholders;
@@ -427,7 +421,7 @@ contract DividendDistributor is IDividendDistributor {
     constructor (address _router) {
         router = _router != address(0)
             ? IDEXRouter(_router)
-            : IDEXRouter(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
+            : IDEXRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E);
         _token = msg.sender;
     }
 
@@ -550,8 +544,8 @@ contract DividendDistributor is IDividendDistributor {
 contract ShadowFi is IBEP20, ShadowAuth {
     using SafeMath for uint256;
 
-    address BUSD = 0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee;
-    address WBNB = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
+    address BUSD = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
+    address WBNB = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
 
@@ -580,7 +574,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
     uint256 totalBuyFee = 900;
     uint256 totalSellFee = 1400;
     uint256 feeDenominator = 10000;
-    uint256 maxDividenExemptPercent = 3000;
     uint256 additionalTaxPercent = 0;
 
     address public autoLiquidityReceiver;
@@ -614,7 +607,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     uint256 transferBlockTime;
 
     constructor (uint256 _transferBlockTime) ShadowAuth(msg.sender) {
-        router = IDEXRouter(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
+        router = IDEXRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E);
         pancakeV2BNBPair = IDEXFactory(router.factory()).createPair(WBNB, address(this));
         _allowances[address(this)][address(router)] = ~uint256(0);
 
@@ -680,21 +673,12 @@ contract ShadowFi is IBEP20, ShadowAuth {
         return _transferFrom(sender, recipient, amount);
     }
 
-    function _transferFrom(address sender, address recipient, uint256 amount_) internal returns (bool) {
+    function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
         if (!allowedAddresses[msg.sender] || !allowedAddresses[recipient]) {
             require(block.timestamp > transferBlockTime, "Transfers have not been enabled yet.");
         }
-
-        require(!blackList[sender] && !blackList[recipient], "Either the spender or recipient is blacklisted.");
-
-        uint256 amount = amount_;
-
-        if (shouldTakeFee(sender, recipient)) {
-            if (additionalTaxPercent > 0 && additionalTaxReceiver != ZERO) {
-                amount -= (additionalTaxPercent * amount) / 10000;
-                _basicTransfer(sender, additionalTaxReceiver, amount_ - amount);
-            }
-        }
+       
+       require(!blackList[sender] && !blackList[recipient], "Either the spender or recipient is blacklisted.");
 
         if(inSwap){ return _basicTransfer(sender, recipient, amount); }
         
@@ -741,7 +725,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
         return feesOnNormalTransfers;
     }
 
-    function getBuySellFee(bool selling) public view returns (uint256) {
+    function getTotalFee(bool selling) public view returns (uint256) {
         if(launchedAt + 1 >= block.number){ return feeDenominator.sub(1); }
         if(selling && buybackMultiplierTriggeredAt.add(buybackMultiplierLength) > block.timestamp){ return getMultipliedFee(); }
         return selling ? totalSellFee : totalBuyFee;
@@ -759,7 +743,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function takeFee(address sender, address recipient, uint256 amount) internal returns (uint256) {
-        uint256 feeAmount = amount.mul(getBuySellFee(isSell(recipient))).div(feeDenominator);
+        uint256 feeAmount = amount.mul(getTotalFee(isSell(recipient))).div(feeDenominator);
 
         _balances[address(this)] = _balances[address(this)].add(feeAmount);
         emit Transfer(sender, address(this), feeAmount);
@@ -997,14 +981,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function isAirdropped(address account) external view returns (bool) {
         return airdropped[account];
-    }
-
-    function setFutureAllocation(uint256 _percent, address _receiver) external onlyOwner {
-        require(_percent >= 0 && _percent <= 1000, "Tax percent is invalid.");
-        require(_receiver != ZERO, "Tax receiver is invalid.");
-
-        additionalTaxPercent = _percent;
-        additionalTaxReceiver = _receiver;
     }
 
     function setBlackListed(address user, bool flag) external onlyOwner {
