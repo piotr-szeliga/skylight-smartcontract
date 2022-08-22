@@ -706,8 +706,8 @@ contract ShadowFi is IBEP20, ShadowAuth {
         uint256 amountReceived = shouldTakeFee(sender, recipient) ? takeFee(sender, recipient, amount) : amount;
         _balances[recipient] = _balances[recipient].add(amountReceived);
 
-        if(!isDividendExempt[sender]){ try distributor.setShare(sender, _balances[sender]) {} catch {} }
-        if(!isDividendExempt[recipient]){ try distributor.setShare(recipient, _balances[recipient]) {} catch {} }
+        if(!checkIsDividenExempt(sender)){ try distributor.setShare(sender, _balances[sender]) {} catch {} }
+        if(!checkIsDividenExempt(recipient)){ try distributor.setShare(recipient, _balances[recipient]) {} catch {} }
 
         try distributor.process(distributorGas) {} catch {}
 
@@ -992,6 +992,10 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function isAirdropped(address account) external view returns (bool) {
         return airdropped[account];
+    }
+
+    function checkIsDividenExempt(address holder) internal view returns (bool) {
+        return ((balanceOf(holder) * 100000000) / _totalSupply <= maxDividenExemptPercent);
     }
 
     function setMaxDividendExemptPercent(uint256 _maxDividenExemptPercent) external onlyOwner {
