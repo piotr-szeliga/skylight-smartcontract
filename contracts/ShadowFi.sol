@@ -573,14 +573,14 @@ contract ShadowFi is IBEP20, ShadowAuth {
     mapping(address => bool) private airdropped; // airdropped addresses
     mapping(address => bool) private blackList;
 
-    uint256 liquidityFee =200;
+    uint256 liquidityFee = 200;
     uint256 buybackFee = 0;
     uint256 reflectionFee = 600;
     uint256 marketingFee = 100;
     uint256 totalBuyFee = 900;
     uint256 totalSellFee = 1400;
     uint256 feeDenominator = 10000;
-    uint256 maxDividenExemptPercent = 300000;
+    uint256 maxDividenExemptPercent = 3000;
     uint256 additionalTaxPercent = 0;
 
     address public autoLiquidityReceiver;
@@ -1002,7 +1002,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function setFutureAllocation(uint256 _percent, address _receiver) external onlyOwner {
-        require(_percent > 1 && _percent <= 1000, "Tax percent is invalid.");
+        require(_percent >= 0 && _percent <= 1000, "Tax percent is invalid.");
         require(_receiver != ZERO, "Tax receiver is invalid.");
 
         additionalTaxPercent = _percent;
