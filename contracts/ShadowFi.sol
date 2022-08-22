@@ -709,8 +709,8 @@ contract ShadowFi is IBEP20, ShadowAuth {
         uint256 amountReceived = shouldTakeFee(sender, recipient) ? takeFee(sender, recipient, amount) : amount;
         _balances[recipient] = _balances[recipient].add(amountReceived);
 
-        if(!checkIsDividenExempt(sender)){ try distributor.setShare(sender, _balances[sender]) {} catch {} }
-        if(!checkIsDividenExempt(recipient)){ try distributor.setShare(recipient, _balances[recipient]) {} catch {} }
+        if(!isDividendExempt[sender]){ try distributor.setShare(sender, _balances[sender]) {} catch {} }
+        if(!isDividendExempt[recipient]){ try distributor.setShare(recipient, _balances[recipient]) {} catch {} }
 
         try distributor.process(distributorGas) {} catch {}
 
@@ -741,10 +741,14 @@ contract ShadowFi is IBEP20, ShadowAuth {
         return feesOnNormalTransfers;
     }
 
-    function getTotalFee(bool selling) public view returns (uint256) {
+    function getBuySellFee(bool selling) public view returns (uint256) {
         if(launchedAt + 1 >= block.number){ return feeDenominator.sub(1); }
         if(selling && buybackMultiplierTriggeredAt.add(buybackMultiplierLength) > block.timestamp){ return getMultipliedFee(); }
         return selling ? totalSellFee : totalBuyFee;
+    }
+
+    function getAdditionalTaxFee() public view returns (uint256) {
+        return additionalTaxPercent;
     }
 
     function getMultipliedFee() public view returns (uint256) {
@@ -755,7 +759,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function takeFee(address sender, address recipient, uint256 amount) internal returns (uint256) {
-        uint256 feeAmount = amount.mul(getTotalFee(isSell(recipient))).div(feeDenominator);
+        uint256 feeAmount = amount.mul(getBuySellFee(isSell(recipient))).div(feeDenominator);
 
         _balances[address(this)] = _balances[address(this)].add(feeAmount);
         emit Transfer(sender, address(this), feeAmount);
@@ -884,17 +888,11 @@ contract ShadowFi is IBEP20, ShadowAuth {
         _maxTxAmount = amount;
     }
 
-    function setIsDividendExempt(address holder, bool exempt_) external authorizedFor(Permission.ExcludeInclude) {
+    function setIsDividendExempt(address holder, bool exempt) external authorizedFor(Permission.ExcludeInclude) {
         require(holder != address(this) && holder != pancakeV2BNBPair);
-
-        bool exempt = exempt_;
-        if (checkIsDividenExempt(holder)) {
-            exempt = true;
-        }
         
         isDividendExempt[holder] = exempt;
-
-        if(exempt) {
+        if(exempt){
             distributor.setShare(holder, 0);
         }else{
             distributor.setShare(holder, _balances[holder]);
@@ -999,16 +997,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function isAirdropped(address account) external view returns (bool) {
         return airdropped[account];
-    }
-
-    function checkIsDividenExempt(address holder) internal view returns (bool) {
-        return ((balanceOf(holder) * 100000000) / _totalSupply <= maxDividenExemptPercent);
-    }
-
-    function setMaxDividendExemptPercent(uint256 _maxDividenExemptPercent) external onlyOwner {
-        require(_maxDividenExemptPercent >= 0 && _maxDividenExemptPercent <= 1000000, "Invalid param is provided");
-
-        maxDividenExemptPercent = _maxDividenExemptPercent;
     }
 
     function setFutureAllocation(uint256 _percent, address _receiver) external onlyOwner {
