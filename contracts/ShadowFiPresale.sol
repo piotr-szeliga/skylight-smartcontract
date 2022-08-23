@@ -88,7 +88,7 @@ interface IShadowFiToken {
 
     function approve(address spender, uint256 amount) external returns (bool);
 
-    function airdropped(address account) external view returns (bool);
+    function isAirdropped(address account) external view returns (bool);
 
     function transferFrom(
         address from,
@@ -271,7 +271,7 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
         uint8 decimals = token.decimals();
         uint256 cost = tokenCost;
         bool discounted = false;
-        if (token.airdropped(msg.sender)) {
+        if (token.isAirdropped(msg.sender)) {
             cost = (tokenCost * (10000 - discountPercent)) / 10000;
             discounted = true;
         }
