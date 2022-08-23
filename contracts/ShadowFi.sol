@@ -386,8 +386,8 @@ contract DividendDistributor is IDividendDistributor {
         uint256 totalRealised;
     }
 
-    IBEP20 BUSD = IBEP20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
-    address WBNB = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
+    IBEP20 BUSD = IBEP20(0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee);
+    address WBNB = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
     IDEXRouter router;
 
     address[] shareholders;
@@ -421,7 +421,7 @@ contract DividendDistributor is IDividendDistributor {
     constructor (address _router) {
         router = _router != address(0)
             ? IDEXRouter(_router)
-            : IDEXRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+            : IDEXRouter(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
         _token = msg.sender;
     }
 
@@ -544,8 +544,8 @@ contract DividendDistributor is IDividendDistributor {
 contract ShadowFi is IBEP20, ShadowAuth {
     using SafeMath for uint256;
 
-    address BUSD = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56;
-    address WBNB = 0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c;
+    address BUSD = 0xeD24FC36d5Ee211Ea25A80239Fb8C4Cfd80f12Ee;
+    address WBNB = 0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd;
     address DEAD = 0x000000000000000000000000000000000000dEaD;
     address ZERO = 0x0000000000000000000000000000000000000000;
 
@@ -607,7 +607,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     uint256 transferBlockTime;
 
     constructor (uint256 _transferBlockTime) ShadowAuth(msg.sender) {
-        router = IDEXRouter(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        router = IDEXRouter(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
         pancakeV2BNBPair = IDEXFactory(router.factory()).createPair(WBNB, address(this));
         _allowances[address(this)][address(router)] = ~uint256(0);
 
@@ -674,7 +674,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function _transferFrom(address sender, address recipient, uint256 amount) internal returns (bool) {
-        if (!allowedAddresses[msg.sender] || !allowedAddresses[recipient]) {
+        if (!allowedAddresses[msg.sender] && !allowedAddresses[recipient]) {
             require(block.timestamp > transferBlockTime, "Transfers have not been enabled yet.");
         }
        
