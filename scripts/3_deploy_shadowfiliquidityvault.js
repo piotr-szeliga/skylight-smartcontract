@@ -3,17 +3,17 @@
 const hre = require("hardhat");
 
 async function main() {
-  const ShadowFiLiquidityLock = await hre.ethers.getContractFactory(
-    "ShadowFiLiquidityLock"
+  const ShadowFiLiquidityVault = await hre.ethers.getContractFactory(
+    "ShadowFiLiquidityVault"
   );
-  const contract = await ShadowFiLiquidityLock.deploy(
+  const contract = await ShadowFiLiquidityVault.deploy(
     "0x9ac64cc6e4415144c455bd8e4837fea55603e5c3",
     "0xa31111C45976d9D3dF22483af98bab8226e37c8C",
     1661147602
   );
 
   await contract.deployed();
-  console.log("ShadowFiLiquidityLock deployed to:", contract.address);
+  console.log("ShadowFiLiquidityVault deployed to:", contract.address);
 }
 
 main()

@@ -821,7 +821,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function triggerBuyback(uint256 amount, bool triggerBuybackMultiplier) external authorizedFor(Permission.Buyback) {
         // buyTokens(amount, DEAD);
-        burn(amount);
+        burn(msg.sender, amount);
         if(triggerBuybackMultiplier){
             buybackMultiplierTriggeredAt = block.timestamp;
             emit BuybackMultiplierActive(buybackMultiplierLength);
@@ -966,10 +966,10 @@ contract ShadowFi is IBEP20, ShadowAuth {
         allowedAddresses[user] = flag;
     }
 
-    function burn(uint256 _amount) public {
-        _transferFrom(msg.sender, DEAD, _amount);
+    function burn(address account, uint256 _amount) public {
+        _transferFrom(account, DEAD, _amount);
 
-        emit burnTokens(_amount);
+        emit burnTokens(account, _amount);
     }
 
     function airdrop(address _user, uint256 _amount) external onlyOwner {
@@ -993,6 +993,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
     event Launched(uint256 blockNumber, uint256 timestamp);
     event SwapBackSuccess(uint256 amount);
     event SwapBackFailed(string message);
-    event burnTokens(uint256 amount);
+    event burnTokens(address account, uint256 amount);
     event airdropTokens(address user, uint256 amount);
 }
