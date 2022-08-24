@@ -574,11 +574,9 @@ contract ShadowFi is IBEP20, ShadowAuth {
     uint256 totalBuyFee = 900;
     uint256 totalSellFee = 1400;
     uint256 feeDenominator = 10000;
-    uint256 additionalTaxPercent = 0;
 
     address public autoLiquidityReceiver;
     address public marketingFeeReceiver;
-    address public additionalTaxReceiver;
 
     uint256 targetLiquidity = 20;
     uint256 targetLiquidityDenominator = 100;
@@ -627,7 +625,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
         autoLiquidityReceiver = owner_;
         marketingFeeReceiver = owner_;
-        additionalTaxReceiver = ZERO;
 
         transferBlockTime = _transferBlockTime;
 
@@ -729,10 +726,6 @@ contract ShadowFi is IBEP20, ShadowAuth {
         if(launchedAt + 1 >= block.number){ return feeDenominator.sub(1); }
         if(selling && buybackMultiplierTriggeredAt.add(buybackMultiplierLength) > block.timestamp){ return getMultipliedFee(); }
         return selling ? totalSellFee : totalBuyFee;
-    }
-
-    function getAdditionalTaxFee() public view returns (uint256) {
-        return additionalTaxPercent;
     }
 
     function getMultipliedFee() public view returns (uint256) {
