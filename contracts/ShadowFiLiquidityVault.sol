@@ -432,7 +432,7 @@ interface IWETH {
     function withdraw(uint) external;
 }
 
-contract ShadowFiLiquidityVault is Ownable, ReentrancyGuard {
+contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     IPancakeRouter private pancakeRouter;
     IShadowFiToken private shadowFiToken;
     uint256 private lockTime;
