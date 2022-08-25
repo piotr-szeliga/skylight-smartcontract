@@ -592,7 +592,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     uint256 distributorGas = 500000;
 
     bool public swapEnabled = true;
-    uint256 public swapThreshold = _maxSupply / 5000; // 0.02%
+    uint256 public swapThreshold = _totalSupply / 5000; // 0.02%
     bool inSwap;
     modifier swapping() { inSwap = true; _; inSwap = false; }
 
@@ -855,7 +855,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function setTxLimit(uint256 amount) external authorizedFor(Permission.AdjustContractVariables) {
-        require(amount >= _maxSupply / 2000);
+        require(amount >= _totalSupply / 2000);
         _maxTxAmount = amount;
     }
 
@@ -915,7 +915,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
     
     function getCirculatingSupply() public view returns (uint256) {
-        return _totalSupply.sub(balanceOf(DEAD)).sub(balanceOf(ZERO));
+        return _maxSupply.sub(balanceOf(DEAD)).sub(balanceOf(ZERO));
     }
 
     function getLiquidityBacking(uint256 accuracy) public view returns (uint256) {
