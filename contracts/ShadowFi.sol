@@ -175,8 +175,6 @@ enum Permission {
     AdjustContractVariables,
     Authorize,
     Unauthorize,
-    PauseUnpauseContract,
-    BypassPause,
     LockPermissions,
     ExcludeInclude
 }
@@ -210,8 +208,6 @@ abstract contract ShadowAuth {
         permissionNameToIndex["AdjustContractVariables"] = uint256(Permission.AdjustContractVariables);
         permissionNameToIndex["Authorize"] = uint256(Permission.Authorize);
         permissionNameToIndex["Unauthorize"] = uint256(Permission.Unauthorize);
-        permissionNameToIndex["PauseUnpauseContract"] = uint256(Permission.PauseUnpauseContract);
-        permissionNameToIndex["BypassPause"] = uint256(Permission.BypassPause);
         permissionNameToIndex["LockPermissions"] = uint256(Permission.LockPermissions);
         permissionNameToIndex["ExcludeInclude"] = uint256(Permission.ExcludeInclude);
 
@@ -220,8 +216,6 @@ abstract contract ShadowAuth {
         permissionIndexToName[uint256(Permission.AdjustContractVariables)] = "AdjustContractVariables";
         permissionIndexToName[uint256(Permission.Authorize)] = "Authorize";
         permissionIndexToName[uint256(Permission.Unauthorize)] = "Unauthorize";
-        permissionIndexToName[uint256(Permission.PauseUnpauseContract)] = "PauseUnpauseContract";
-        permissionIndexToName[uint256(Permission.BypassPause)] = "BypassPause";
         permissionIndexToName[uint256(Permission.LockPermissions)] = "LockPermissions";
         permissionIndexToName[uint256(Permission.ExcludeInclude)] = "ExcludeInclude";
     }
