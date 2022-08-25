@@ -252,7 +252,7 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
         return stopTime;
     }
 
-    function buy(uint256 _amount) external payable {
+    function buy(uint256 _amount) external payable nonReentrant {
         require(block.timestamp >= startTime, "Presale has not started yet.");
         require(block.timestamp <= stopTime, "Presale has ended.");
         require(
