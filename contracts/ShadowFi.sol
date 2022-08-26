@@ -563,10 +563,10 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     uint256 liquidityFee = 200;
     uint256 buybackFee = 0;
-    uint256 reflectionFee = 600;
-    uint256 marketingFee = 100;
-    uint256 totalBuyFee = 900;
-    uint256 totalSellFee = 1400;
+    uint256 reflectionFee = 200;
+    uint256 marketingFee = 200;
+    uint256 totalBuyFee = 600;
+    uint256 totalSellFee = 600;
     uint256 feeDenominator = 10000;
 
     address public autoLiquidityReceiver;
