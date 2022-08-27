@@ -275,7 +275,7 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
             cost = (tokenCost * (10000 - discountPercent)) / 10000;
             discounted = true;
         }
-        uint256 totalCost = (_amount / (10**decimals)) * cost;
+        uint256 totalCost = (_amount * cost) / (10**decimals);
         require(msg.value >= totalCost, "Insufficient payment provided.");
 
         payable(owner()).transfer(totalCost);
