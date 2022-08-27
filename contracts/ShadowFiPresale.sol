@@ -108,9 +108,10 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
     uint256 private tokenCost;
     uint256 private discountPercent;
     uint256 private maxAmount;
+    uint256 private minAmount;
     uint32 private startTime;
     uint32 private stopTime;
-
+    
     event buyTokens(
         address indexed user,
         uint256 amount,
@@ -128,6 +129,8 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
         maxAmount = uint256(0);
         startTime = uint32(0);
         stopTime = uint32(0);
+        uint8 decimals = token.decimals();
+        minAmount = 10 ** decimals;
     }
 
     /*******************************************************************************************************/
@@ -199,6 +202,10 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
         maxAmount = _maxAmount;
     }
 
+    function setMin(uint256 _minAmount) public onlyOwner {
+        minAmount = _minAmount;
+    }
+
     function withdraw() public onlyOwner {
         uint256 balance = address(this).balance;
         payable(msg.sender).transfer(balance);
@@ -263,6 +270,7 @@ contract ShadowFiPresale is Ownable, ReentrancyGuard {
             _amount <= availableForSale,
             "Insufficient available for sale."
         );
+        require(minAmount <= _amount, "Can not buy less than minimum amount.");
         require(
             _amount + totalBoughtByUser[msg.sender] <= maxAmount,
             "Exceeds maximum purchase."
