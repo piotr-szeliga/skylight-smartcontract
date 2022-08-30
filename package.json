@@ -6,6 +6,7 @@
     "test": "mocha --exit --recursive"
   },
   "dependencies": {
+    "@chainlink/contracts": "^0.4.1",
     "ethers": "^5.6.8",
     "fast-csv": "^4.3.6"
   },
