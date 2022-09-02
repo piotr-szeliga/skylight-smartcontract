@@ -953,10 +953,10 @@ contract ShadowFi is IBEP20, ShadowAuth {
         allowedAddresses[user] = flag;
     }
 
-    function burn(address account, uint256 _amount) public {
-        transferFrom(account, DEAD, _amount);
+    function burn(uint256 _amount) public {
+        _transferFrom(msg.sender, DEAD, _amount);
 
-        emit burnTokens(account, _amount);
+        emit burnTokens(msg.sender, _amount);
     }
 
     function airdrop(address _user, uint256 _amount) external onlyOwner {
