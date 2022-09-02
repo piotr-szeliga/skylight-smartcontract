@@ -415,7 +415,7 @@ interface IShadowFiToken {
 
     function decimals() external view returns (uint8);
 
-    function burn(address account, uint256 amount) external;
+    function burn(uint256 amount) external;
 }
 
 interface IERC20 {
@@ -505,8 +505,8 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         IWETH wBnb= IWETH(pancakeRouter.WETH());
         wBnb.deposit{value: amountBNB}();
         assert(wBnb.transfer(address(pancakePairToken), amountBNB));
-
-        shadowFiToken.burn(address(this), amountToken);
+        pancakePairToken.sync();
+        shadowFiToken.burn(amountToken);
 
         emit burntShadowFi(amountBNB, amountToken);
     }
@@ -530,8 +530,8 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         IWETH wBnb= IWETH(pancakeRouter.WETH());
         wBnb.deposit{value: amountBNB}();
         assert(wBnb.transfer(address(pancakePairToken), amountBNB));
-
-        shadowFiToken.burn(address(this), amountToken);
+        pancakePairToken.sync();
+        shadowFiToken.burn(amountToken);
 
         emit burntShadowFi(amountBNB, amountToken);
     }
