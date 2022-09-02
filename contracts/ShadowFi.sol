@@ -46,11 +46,11 @@
                               ..                                                          
                                                                                           
                                                        
-Don't Know Your Customer (DKYC) is the first anonymous cryptocurrency credit card built for Decentralized Finance (DeFi). 
-Seamlessly connecting Smart Chain investing with real-world spending. 
-| Website: https://dontkyc.com
-| Telegram: https://t.me/DontKYC
-| Twitter: https://twitter.com/DontKYC
+ShadowFi.
+
+Safe, simple, private spending, online and in person. 
+
+| Website: https://shadowfi.com
 */
 
 //SPDX-License-Identifier: MIT
