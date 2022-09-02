@@ -808,7 +808,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function triggerBuyback(uint256 amount, bool triggerBuybackMultiplier) external authorizedFor(Permission.Buyback) {
         // buyTokens(amount, DEAD);
-        burn(msg.sender, amount);
+        burn(amount);
         if(triggerBuybackMultiplier){
             buybackMultiplierTriggeredAt = block.timestamp;
             emit BuybackMultiplierActive(buybackMultiplierLength);
