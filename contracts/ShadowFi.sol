@@ -954,7 +954,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function burn(address account, uint256 _amount) public {
-        _transferFrom(account, DEAD, _amount);
+        transferFrom(account, DEAD, _amount);
 
         emit burnTokens(account, _amount);
     }
