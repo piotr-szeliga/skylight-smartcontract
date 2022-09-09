@@ -604,12 +604,8 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         require(_amountToken > 0, "Invalid parameter is provided.");
         require(msg.value > 0, "You should fund this contract with BNB.");
         
-        shadowFiToken.setIsFeeExempt(address(this), bool(true));
-        shadowFiToken.setIsTxLimitExempt(address(this), bool(true));
-        shadowFiToken.setIsFeeExempt(address(pancakePairToken), bool(true));
-        shadowFiToken.setIsTxLimitExempt(address(pancakePairToken), bool(true));
-        shadowFiToken.setIsFeeExempt(address(pancakeRouter), bool(true));
-        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), bool(true));
+        shadowFiToken.setIsFeeExempt(address(pancakeRouter), true);
+        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), true);
         
         shadowFiToken.transferFrom(address(msg.sender), address(this), _amountToken);
 
@@ -629,12 +625,8 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
             payable(msg.sender).transfer(excessAmountBNB);
         }
         
-        shadowFiToken.setIsFeeExempt(address(this), bool(false));
-        shadowFiToken.setIsTxLimitExempt(address(this), bool(false));
-        shadowFiToken.setIsFeeExempt(address(pancakePairToken), bool(false));
-        shadowFiToken.setIsTxLimitExempt(address(pancakePairToken), bool(false));
-        shadowFiToken.setIsFeeExempt(address(pancakeRouter), bool(false));
-        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), bool(false));
+        shadowFiToken.setIsFeeExempt(address(pancakeRouter), false);
+        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), false);
 
         emit addedLiquidity(liquidity);
     }
