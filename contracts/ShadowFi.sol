@@ -47,9 +47,7 @@
                                                                                           
                                                        
 ShadowFi.
-
 Safe, simple, private spending, online and in person. 
-
 | Website: https://shadowfi.com
 */
 
@@ -225,6 +223,13 @@ abstract contract ShadowAuth {
      */
     modifier onlyOwner() {
         require(isOwner(msg.sender), "Ownership required."); _;
+    }
+    
+    /**
+     * Function modifier to require caller to be contract owner or whitelistedContract.
+     */
+    modifier onlyAuthorized() {
+      require(isOwner(msg.sender) || whitelistedContract(msg.sender), "Authorization required."); _;
     }
 
     /**
@@ -560,6 +565,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     mapping (address => bool) allowedAddresses;
     mapping(address => bool) private airdropped; // airdropped addresses
     mapping(address => bool) private blackList;
+    mapping(address => bool) private whitelistedContract;
 
     uint256 liquidityFee = 200;
     uint256 buybackFee = 0;
@@ -807,8 +813,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
     }
 
     function triggerBuyback(uint256 amount, bool triggerBuybackMultiplier) external authorizedFor(Permission.Buyback) {
-        // buyTokens(amount, DEAD);
-        burn(amount);
+        buyTokens(amount, DEAD);
         if(triggerBuybackMultiplier){
             buybackMultiplierTriggeredAt = block.timestamp;
             emit BuybackMultiplierActive(buybackMultiplierLength);
@@ -859,7 +864,7 @@ contract ShadowFi is IBEP20, ShadowAuth {
         _maxTxAmount = amount;
     }
 
-    function setIsDividendExempt(address holder, bool exempt) external authorizedFor(Permission.ExcludeInclude) {
+    function setIsDividendExempt(address holder, bool exempt) external onlyAuthorized {
         require(holder != address(this) && holder != pancakeV2BNBPair);
         
         isDividendExempt[holder] = exempt;
@@ -870,11 +875,11 @@ contract ShadowFi is IBEP20, ShadowAuth {
         }
     }
 
-    function setIsFeeExempt(address holder, bool exempt) external authorizedFor(Permission.ExcludeInclude) {
+    function setIsFeeExempt(address holder, bool exempt) external onlyAuthorized {
         isFeeExempt[holder] = exempt;
     }
 
-    function setIsTxLimitExempt(address holder, bool exempt) external authorizedFor(Permission.ExcludeInclude) {
+    function setIsTxLimitExempt(address holder, bool exempt) external onlyAuthorized {
         isTxLimitExempt[holder] = exempt;
     }
 
@@ -972,6 +977,10 @@ contract ShadowFi is IBEP20, ShadowAuth {
 
     function setBlackListed(address user, bool flag) external onlyOwner {
         blackList[user] = flag;
+    }
+    
+    function setWhitelistedContract(address contractAddress, bool flag) external onlyOwner {
+        whitelistedContract[user] = flag;
     }
 
     event AutoLiquify(uint256 amountBNB, uint256 amountBOG);
