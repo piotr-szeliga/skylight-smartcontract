@@ -19,9 +19,13 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
   }
 });
 
-const network = process.env.HARDHAT_NETWORK ? process.env.HARDHAT_NETWORK : "rinkeby";
+const network = process.env.HARDHAT_NETWORK
+  ? process.env.HARDHAT_NETWORK
+  : "fujiavax";
 const API_KEY =
-  network === "ropsten"
+  network === "fujiavax"
+    ? process.env.AVAXSCAN_API_KEY
+    : network === "ropsten"
     ? process.env.ETHERSCAN_API_KEY
     : network === "bsctestnet" || network === "bscmainnet"
     ? process.env.BSCSCAN_API_KEY
@@ -56,32 +60,59 @@ module.exports = {
     ropsten: {
       chainId: 3,
       url: process.env.ROPSTEN_PROVIDER_URL || "https://ropsten.infura.io/v3/",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     rinkeby: {
       chainId: 4,
       url: process.env.RINKEBY_PROVIDER_URL || "https://rinkeby.infura.io/v3/",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     matic: {
       chainId: 137,
       url: process.env.MATIC_PROVIDER_URL || "https://polygon-rpc.com",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     mumbai: {
       chainId: 80001,
-      url: process.env.MUMBAI_PROVIDER_URL || "https://rpc-mumbai.maticvigil.com",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      url:
+        process.env.MUMBAI_PROVIDER_URL || "https://rpc-mumbai.maticvigil.com",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     bscmainnet: {
       chainId: 56,
-      url: process.env.BSCMAIN_PROVIDER_URL || "https://bsc-dataseed4.binance.org/",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      url:
+        process.env.BSCMAIN_PROVIDER_URL ||
+        "https://bsc-dataseed4.binance.org/",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
     bsctestnet: {
       chainId: 97,
-      url: process.env.BSCTEST_PROVIDER_URL || "https://data-seed-prebsc-1-s3.binance.org:8545/",
-      accounts: process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+      url:
+        process.env.BSCTEST_PROVIDER_URL ||
+        "https://data-seed-prebsc-1-s3.binance.org:8545/",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    avax: {
+      chainId: 43114,
+      url:
+        process.env.AVAXSCAN_PROVIDER_URL ||
+        "https://api.avax.network/ext/bc/C/rpc",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    fujiavax: {
+      chainId: 43113,
+      url:
+        process.env.FUJIAVAXSCAN_PROVIDER_URL ||
+        "https://api.avax-test.network/ext/bc/C/rpc",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
   },
   gasReporter: {

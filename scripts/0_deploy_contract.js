@@ -3,18 +3,16 @@
 const hre = require("hardhat");
 
 async function main() {
-  const Moodies = await hre.ethers.getContractFactory("Moodies");
-  const contract = await Moodies.deploy(
-    "Moodies",
-    "MDS",
+  const Ambush = await hre.ethers.getContractFactory("Ambush");
+  const contract = await Ambush.deploy(
+    "Ambush",
+    "ABS",
     100000000000000,
-    7401,
     "ipfs://bafybeifv2jje4fwjru7iqiphj2h5lpeoqq6zjsz4czpzojq7w7tvo4hi3m/",
-    "0xb7dE241d7E6f64CcBea73eECDbD91E949A7461dd"
   );
 
   await contract.deployed();
-  console.log("Moodies deployed to:", contract.address);
+  console.log("Ambush deployed to:", contract.address);
 }
 
 main()
