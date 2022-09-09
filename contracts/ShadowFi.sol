@@ -974,13 +974,25 @@ contract ShadowFi is IBEP20, ShadowAuth {
     function isAirdropped(address account) external view returns (bool) {
         return airdropped[account];
     }
+    
+    function isFeeExempt(address account) external view returns (bool) {
+        return isFeeExempt[account];
+    }
+    
+    function isDividendExempt(address account) external view returns (bool) {
+        return isDividendExempt[account];
+    }
+    
+    function isTXLimitExempt(address account) external view returns (bool) {
+        return isTxLimitExempt[account];
+    }
 
     function setBlackListed(address user, bool flag) external onlyOwner {
         blackList[user] = flag;
     }
     
     function setWhitelistedContract(address contractAddress, bool flag) external onlyOwner {
-        whitelistedContract[user] = flag;
+        whitelistedContract[contractAddress] = flag;
     }
 
     event AutoLiquify(uint256 amountBNB, uint256 amountBOG);
