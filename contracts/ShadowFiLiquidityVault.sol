@@ -398,6 +398,10 @@ interface IShadowFiToken {
 
     function transfer(address to, uint256 amount) external returns (bool);
 
+    function setIsFeeExempt(address holder, bool exempt) external;
+
+    function setIsTxLimitExempt(address holder, bool exempt) external;
+
     function allowance(address owner, address spender)
         external
         view
@@ -497,6 +501,10 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         require(liquidPercent > 800, "The amount of ShadowFi tokens in liquidity should be 8%+ of the totalSupply.");
 
         uint256 removeAmount = ((liquidPercent - 800) * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
+        
+        shadowFiToken.setIsFeeExempt(address(pancakePairToken), true);
+        shadowFiToken.setIsTxLimitExempt(address(pancakePairToken), true);
+        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), true);
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
@@ -507,6 +515,10 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         assert(wBnb.transfer(address(pancakePairToken), amountBNB));
         pancakePairToken.sync();
         shadowFiToken.burn(amountToken);
+        
+        shadowFiToken.setIsFeeExempt(address(pancakePairToken), false);
+        shadowFiToken.setIsTxLimitExempt(address(pancakePairToken), false);
+        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), false);
 
         emit burntShadowFi(amountBNB, amountToken);
     }
@@ -522,6 +534,10 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         require(liquidPercent - percent >= 800, "The amount compared to liquidity tokens should be less than 8% of the totalSupply.");
 
         uint256 removeAmount = (percent * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
+        
+        shadowFiToken.setIsFeeExempt(address(pancakePairToken), true);
+        shadowFiToken.setIsTxLimitExempt(address(pancakePairToken), true);
+        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), true);
 
         pancakePairToken.approve(address(pancakeRouter), removeAmount);
 
@@ -532,6 +548,10 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         assert(wBnb.transfer(address(pancakePairToken), amountBNB));
         pancakePairToken.sync();
         shadowFiToken.burn(amountToken);
+        
+        shadowFiToken.setIsFeeExempt(address(pancakePairToken), false);
+        shadowFiToken.setIsTxLimitExempt(address(pancakePairToken), false);
+        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), false);
 
         emit burntShadowFi(amountBNB, amountToken);
     }
@@ -554,7 +574,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         liquidPercent = ((liquidTokens * 10000) / shadowFiToken.totalSupply());
     }
 
-    function getRemoveAmountForBuyAndBurnExcess() public view returns (uint256 removeAmount) {
+    function getShadowStrikeAmount() public view returns (uint256 removeAmount) {
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
         uint256 liquidTokens = (shadowFiToken.balanceOf(address(pancakePairToken)) * lpOwnershipPercent) / 10000;
@@ -565,7 +585,7 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         removeAmount = ((liquidPercent - 800) * lpOwnershipPercent * pancakePairToken.totalSupply()) / (liquidPercent * 10000);
     }
 
-    function getRemoveAmountForBuyAndBurnExcessAmount(uint256 percent) public view returns (uint256 removeAmount) {
+    function getShadowBurstAmount(uint256 percent) public view returns (uint256 removeAmount) {
         require(percent >= 1 && percent <= 9200, "Invalid parameter is provided");
         IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         uint256 lpOwnershipPercent = (pancakePairToken.balanceOf(address(this)) * 10000) / pancakePairToken.totalSupply();
@@ -579,10 +599,14 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
     }
 
     function addLiquidity(uint256 _amountToken) external payable onlyOwner nonReentrant {
+        IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
         require(!lockEnded, "Contract is locked.");
         require(_amountToken > 0, "Invalid parameter is provided.");
         require(msg.value > 0, "You should fund this contract with BNB.");
-
+        
+        shadowFiToken.setIsFeeExempt(address(pancakeRouter), true);
+        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), true);
+        
         shadowFiToken.transferFrom(address(msg.sender), address(this), _amountToken);
 
         shadowFiToken.approve(address(pancakeRouter), _amountToken);
@@ -600,8 +624,23 @@ contract ShadowFiLiquidityLock is Ownable, ReentrancyGuard {
         if (excessAmountBNB > 0) {
             payable(msg.sender).transfer(excessAmountBNB);
         }
+        
+        shadowFiToken.setIsFeeExempt(address(pancakeRouter), false);
+        shadowFiToken.setIsTxLimitExempt(address(pancakeRouter), false);
 
         emit addedLiquidity(liquidity);
+    }
+
+    function injectBNB() public payable onlyOwner {
+        IPancakePair pancakePairToken = IPancakePair(IPancakeFactory(pancakeRouter.factory()).getPair(pancakeRouter.WETH(), address(shadowFiToken)));
+
+        IWETH wBnb= IWETH(pancakeRouter.WETH());
+
+        uint256 amountBNB = msg.value;
+        wBnb.deposit{value: amountBNB}();
+        assert(wBnb.transfer(address(pancakePairToken), amountBNB));
+        
+        pancakePairToken.sync();
     }
 
     function getLockTime() public view returns (uint256) {
