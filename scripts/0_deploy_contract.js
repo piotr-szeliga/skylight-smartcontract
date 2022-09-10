@@ -5,8 +5,6 @@ const hre = require("hardhat");
 async function main() {
   const Ambush = await hre.ethers.getContractFactory("Ambush");
   const contract = await Ambush.deploy(
-    "Ambush",
-    "ABS",
     100000000000000,
     "ipfs://bafybeifv2jje4fwjru7iqiphj2h5lpeoqq6zjsz4czpzojq7w7tvo4hi3m/",
   );
