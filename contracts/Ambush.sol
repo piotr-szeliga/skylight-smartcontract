@@ -240,4 +240,8 @@ contract Ambush is ERC1155, IERC2981, Ownable, Pausable, ContextMixin, Reentranc
             super.supportsInterface(interfaceId)
         );
     }
+
+    function _msgSender() internal override view returns (address) {
+        return ContextMixin.msgSender();
+    }
 }

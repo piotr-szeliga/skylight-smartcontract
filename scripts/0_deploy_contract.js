@@ -6,7 +6,7 @@ async function main() {
   const Ambush = await hre.ethers.getContractFactory("Ambush");
   const contract = await Ambush.deploy(
     100000000000000,
-    "ipfs://bafybeifv2jje4fwjru7iqiphj2h5lpeoqq6zjsz4czpzojq7w7tvo4hi3m/",
+    "https://a3.mypinata.cloud/ipfs/QmYV2LGeafHGsZSBHaibo5vHuq6maJ8JkvD9oh7CYmV27n/"
   );
 
   await contract.deployed();
