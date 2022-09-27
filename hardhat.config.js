@@ -21,7 +21,7 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
 
 const network = process.env.HARDHAT_NETWORK
   ? process.env.HARDHAT_NETWORK
-  : "fujiavax";
+  : "goerli";
 const API_KEY =
   network === "fujiavax"
     ? process.env.AVAXSCAN_API_KEY
@@ -66,6 +66,12 @@ module.exports = {
     rinkeby: {
       chainId: 4,
       url: process.env.RINKEBY_PROVIDER_URL || "https://rinkeby.infura.io/v3/",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
+    goerli: {
+      chainId: 5,
+      url: process.env.GOERLI_PROVIDER_URL || "https://goerli.infura.io/v3/",
       accounts:
         process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
     },
