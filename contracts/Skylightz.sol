@@ -21,35 +21,26 @@ contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
     uint256 public price;
     uint256 public royaltyPercent;
     bool public revealed;
-    bool public membersReady;
     string private placeholderURI;
     string private baseURI;
     uint256 public allowedSupply;
     uint256 public maxSupply;
     uint256 private currentTokenId;
     string public contractURL;
-    address proxyRegistryAddress;
-    address[] members;
-    uint256[] profits;
+    address private proxyRegistryAddress;
+    address private primaryRecipient;
+    address private secondaryRecipient;
+    mapping(address => uint256) private minted;
     
     constructor(string memory _placeholderURI, string memory _baseURI) ERC1155(string(abi.encodePacked(_baseURI, "{id}.json"))) {
         price = 1000000000000000;
         royaltyPercent = 1000;
         revealed = false;
-        membersReady = false;
         placeholderURI = _placeholderURI;
         baseURI = _baseURI;
-        allowedSupply = 15;
-        maxSupply = 105;
+        allowedSupply = 20;
+        maxSupply = 100;
         currentTokenId = 0;
-        members = new address[](5);
-        for (uint256 i = 0; i < 5; i++) {
-            members[i] = address(0);
-        }
-        profits = new uint256[](5);
-        for (uint256 i = 0; i < 5; i++) {
-            profits[i] = 2000;
-        }
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -84,9 +75,9 @@ contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
     }
 
     function addDailyAllowedSupply() public onlyOwner {
-        require(allowedSupply + 10 <= maxSupply, "Daily mint limit ended");
+        require(allowedSupply + 20 <= maxSupply, "Daily mint limit ended");
 
-        allowedSupply += 10;
+        allowedSupply += 20;
     }
 
     function setAllowedSupply(uint256 _allowedSupply) public onlyOwner {
@@ -100,51 +91,35 @@ contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
         contractURL = _contractURL;
     }
 
-    function setProxyAddress(address _proxyAddress) public onlyOwner {
-        proxyRegistryAddress = _proxyAddress;
+    function setPrimaryRecipient(address _recipient) external onlyOwner {
+        require(_recipient != address(0), "New recipient is the zero address.");
+
+        primaryRecipient = _recipient;
     }
 
-    function distributeRoyalties() public onlyOwner {
-        require(membersReady, "Members are not ready");
-        uint256 balance = address(this).balance;
-        require(balance > 0, "Insufficient balance");
+    function setSecondaryRecipient(address _recipient) external onlyOwner {
+        require(_recipient != address(0), "New recipient is the zero address.");
 
-        for (uint256 index = 0; index < 5; index++) {
-            uint256 amount = (balance * profits[index]) / 10000;
-            payable(members[index]).transfer(amount);
-        }
+        secondaryRecipient = _recipient;
+    }
+
+    function setProxyAddress(address _proxyAddress) public onlyOwner {
+        proxyRegistryAddress = _proxyAddress;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////////////// Mint Functions ///////////////////////////////////////////
     //////////////////////////////////////////////////////////////////////////////////////////////////////
-    function mintMembers(address[] memory _members, uint256[] memory _profits) public onlyOwner {
-        require(_members.length == 5, "Invalid members provided");
-
-        for (uint256 index = 0; index < 5; index++) {
-            _mint(_members[index], currentTokenId, 1, "");
-
-            members[index] = _members[index];
-            profits[index] = _profits[index];
-            currentTokenId += 1;
-        }
-
-        membersReady = true;
-    }
-
     function mint() external payable {
-        require(membersReady, "Members are not ready");
         require(currentTokenId + 1 <= allowedSupply, "Daily mint limited");
         require(msg.value >= price, "Not enough to pay for that");
 
-        for (uint256 index = 0; index < 5; index++) {
-            uint256 amount = (msg.value * profits[index]) / 10000;
-            payable(members[index]).transfer(amount);
-        }
+        payable(primaryRecipient).transfer(msg.value);
         
         _mint(msg.sender, currentTokenId, 1, "");
 
         currentTokenId += 1;
+        minted[msg.sender] += 1;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -163,8 +138,9 @@ contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
 
         if (revealed) {
             return string(abi.encodePacked(baseURI, Strings.toString(_tokenId), ".json"));
+        } else {
+            return string(abi.encodePacked(placeholderURI, Strings.toString(_tokenId), ".json"));
         }
-        return string(abi.encodePacked(placeholderURI, Strings.toString(_tokenId), ".json"));
     }
 
     function isApprovedForAll(address _owner, address _operator) public view override returns (bool isOperator) {
@@ -174,6 +150,10 @@ contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
         }
 
         return super.isApprovedForAll(_owner, _operator);
+    }
+
+    function mintedBalanceOf(address _address) public view returns (uint256) {
+        return minted[_address];
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -186,7 +166,7 @@ contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
     function royaltyInfo(uint256 _tokenId, uint256 _salePrice) external view override returns (address receiver, uint256 royaltyAmount) {
         require(_tokenId <= allowedSupply - 1, "NFT does not exist");
 
-        return (address(this), (_salePrice * royaltyPercent) / 10000);
+        return (secondaryRecipient, (_salePrice * royaltyPercent) / 10000);
     }
 
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC1155, IERC165) returns (bool) {
