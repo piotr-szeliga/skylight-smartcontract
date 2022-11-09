@@ -15,8 +15,8 @@ contract ProxyRegistry {
 }
 
 contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
-    string public name = "Skylightz";
-    string public symbol = "SKY";
+    string public name = "SKY - Kazo Prestige Membership";
+    string public symbol = "SKPM";
 
     uint256 public price;
     uint256 public royaltyPercent;
@@ -34,13 +34,15 @@ contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
     
     constructor(string memory _placeholderURI, string memory _baseURI) ERC1155(string(abi.encodePacked(_baseURI, "{id}.json"))) {
         price = 1000000000000000;
-        royaltyPercent = 1000;
+        royaltyPercent = 2000;
         revealed = false;
         placeholderURI = _placeholderURI;
         baseURI = _baseURI;
         allowedSupply = 20;
         maxSupply = 100;
         currentTokenId = 0;
+        primaryRecipient = 0xCFbbddDA568a07859Ccc59D0aBE337D68606028C;
+        secondaryRecipient = 0xCFbbddDA568a07859Ccc59D0aBE337D68606028C;
     }
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////
