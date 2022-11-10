@@ -5,8 +5,8 @@ const hre = require("hardhat");
 async function main() {
   const Skylightz = await hre.ethers.getContractFactory("Skylightz");
   const contract = await Skylightz.deploy(
-    "https://skylightz.mypinata.cloud/ipfs/QmRcVVxcXtkJzUcoGC88jLCHDYbz8i9KPRWdP7c8zSiH2j/",
-    "https://skylightz.mypinata.cloud/ipfs/QmVFyq23yDDWwjpBxQuxGy3N5iCAM6GNnCSQSjEVAYze2x/"
+    "https://skylightz.mypinata.cloud/ipfs/QmPmjMrpHEug7LP5GYXAyAWapQMVoWQeH1U1xAh4dLa6tK/",
+    "https://skylightz.mypinata.cloud/ipfs/Qmd87igWj7bJhFExEzKPJAcmpvrUnGkTNuCwX8AeCGqQsA/"
   );
 
   await contract.deployed();
