@@ -14,9 +14,9 @@ contract ProxyRegistry {
     mapping(address => OwnableDelegateProxy) public proxies;
 }
 
-contract Skylightz is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
-    string public name = "SKY - Kazo Prestige Membership";
-    string public symbol = "SKPM";
+contract MemoryReality2 is ERC1155, IERC2981, Ownable, Pausable, ReentrancyGuard {
+    string public name = "Memory to Reality 2.0";
+    string public symbol = "MTR";
 
     uint256 public price;
     uint256 public royaltyPercent;

@@ -57,6 +57,12 @@ module.exports = {
       chainId: 1337,
       initialBaseFeePerGas: 0, // workaround from https://github.com/sc-forks/solidity-coverage/issues/652#issuecomment-896330136 . Remove when that issue is closed.
     },
+    mainnet: {
+      chainId: 1,
+      url: process.env.MAINNET_PROVIDER_URL || "https://mainnet.infura.io/v3/",
+      accounts:
+        process.env.PRIVATE_KEY !== undefined ? [process.env.PRIVATE_KEY] : [],
+    },
     ropsten: {
       chainId: 3,
       url: process.env.ROPSTEN_PROVIDER_URL || "https://ropsten.infura.io/v3/",
